@@ -1,3 +1,16 @@
-<p>
-  new-user-form works!
-</p>
+<div id="body">
+  <div id="container">
+    <!-- Container for log in options -->
+    <div id="login">
+      <h1>Project 4</h1>
+      <form #f="ngForm" (ngSubmit)="onSubmit(f.value)">
+        <input id="user" name="user" type="text" placeholder="Username" required ngModel>
+        <input id="pass" name="pass" type="password" placeholder="Password" required ngModel>
+        <input id="pass-confirm" name="pass-confirm" type="password" placeholder="Confirm password" required ngModel>
+        <input id="loginBtn" type="submit" value="Create and log in">
+      </form>
+      <input id="logoutBtn" type="reset" value="Back" [routerLink]="['/login']">
+    </div>
+  </div>
+  <script></script>
+</div>
