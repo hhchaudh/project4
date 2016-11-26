@@ -1,0 +1,83 @@
+
+<div id="body">
+<div id="container">
+  <!-- Header -->
+  <div id="header">
+    EECS448 Project 4
+  </div>
+
+  <!-- Container for lobbies and chatbox -->
+  <div id="main">
+    <!-- Game screen -->
+    <div id="lobby-menu">
+      <div class="lobby-header">Game Lobbies</div>
+      <div class="lobby-subheader">
+        <div class="lobby-name">Name</div>
+        <div class="lobby-header-status">Status</div>
+      </div>
+      <div id="lobbies">
+        <div class="lobby">
+          <div class="lobby-name">$host1's lobby</div>
+          <div class="lobby-status"><img src="./assets/lobby-img/status-green.svg"> Open</div>
+        </div>
+        <div class="lobby">
+          <div class="lobby-name">$host2's lobby</div>
+          <div class="lobby-status"><img src="./assets/lobby-img/status-yellow.svg"> Full</div>
+        </div>
+        <div class="lobby">
+          <div class="lobby-name">$host3's lobby</div>
+          <div class="lobby-status"><img src="./assets/lobby-img/status-red.svg"> In-game</div>
+        </div>
+      </div>
+    </div>
+    <!-- Chatbox -->
+    <div id="chat">
+      <div id="chat-messages">
+        <div class="message"><strong>User: </strong>Message</div>
+        <div class="message"><strong>User: </strong>Message</div>
+        <div class="message"><strong>User: </strong>Message</div>
+        <!--<div class="message"><strong>(Time) User: </strong>Message</div>-->
+        <!--<div class="message"><strong>(Time) User: </strong>Message</div>-->
+        <!--<div class="message"><strong>(Time) User: </strong>Message</div>-->
+        <!--<div class="message"><strong>(Time) User: </strong>Message</div>-->
+        <!--<div class="message"><strong>(Time) User: </strong>Message</div>-->
+      </div>
+      <div id="chat-entrybox">
+        <input id="send" name="send" type="text" placeholder="Enter a message here...">
+      </div>
+    </div>
+    <!-- Sidebar -->
+    <div id="sidebar">
+      <div class="sidebar-header">Players</div>
+      <div class="sidebar-subheader">
+        <div class="player-name">Name</div>
+        <div class="player-header-status">Status</div>
+      </div>
+      <div id="players">
+        <div class="sidebar-item">
+          <div class="player-name">Player 1</div>
+          <div class="player-status"><img src="./assets/lobby-img/status-blue.svg"> Main lobby</div>
+        </div>
+        <div class="sidebar-item">
+          <div class="player-name">Player 2</div>
+          <div class="player-status"><img src="./assets/lobby-img/status-green.svg"> Joinable</div>
+        </div>
+        <div class="sidebar-item">
+          <div class="player-name">Player 3</div>
+          <div class="player-status"><img src="./assets/lobby-img/status-yellow.svg"> Full lobby</div>
+        </div>
+        <div class="sidebar-item">
+          <div class="player-name">Player 4</div>
+          <div class="player-status"><img src="./assets/lobby-img/status-red.svg"> In-game</div>
+        </div>
+      </div>
+    </div>
+    <div id="sidebar-buttons">
+      <input id="logoutBtn" type="submit" value="Log out">
+    </div>
+  </div>
+
+</div>
+
+</div>
+
