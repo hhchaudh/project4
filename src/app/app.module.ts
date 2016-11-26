@@ -9,6 +9,7 @@ import { LobbyComponent } from './components/lobby/lobby.component';
 import { GameComponent } from './components/game/game.component';
 import { NewUserFormComponent } from './components/new-user-form/new-user-form.component';
 import {routing} from "./app.routes";
+import {LocationStrategy, HashLocationStrategy} from "@angular/common";
 
 @NgModule({
   declarations: [
@@ -24,7 +25,7 @@ import {routing} from "./app.routes";
     HttpModule,
     routing
   ],
-  providers: [],
+  providers: [{provide: LocationStrategy, useClass: HashLocationStrategy}],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

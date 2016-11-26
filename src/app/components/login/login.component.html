@@ -1,13 +1,15 @@
 <div id="body">
-<div id="container">
-  <!-- Container for log in options -->
-  <div id="login">
-    <h1>Project 4</h1>
-    <input id="user" name="user" type="text" placeholder="Username" required>
-    <input id="pass" name="pass" type="password" placeholder="Password">
-    <input id="loginBtn" type="submit" value="Log in" [routerLink]="['/lobby']">
-    <input id="createBtn" type="submit" value="Create user" [routerLink]="['/NewUser']">
+  <div id="container">
+    <!-- Container for log in options -->
+    <div id="login">
+      <h1>Project 4</h1>
+      <form #f="ngForm" (ngSubmit)="onSubmit(f.value)">
+        <input id="user" name="user" type="text" placeholder="Username" required ngModel>
+        <input id="pass" name="pass" type="password" placeholder="Password" required ngModel>
+        <input id="loginBtn" type="submit" value="Log in">
+      </form>
+      <input id="createBtn" type="submit" value="Create user" [routerLink]="['/NewUser']">
+    </div>
   </div>
-</div>
-<script></script>
+  <script></script>
 </div>
