@@ -1,3 +1,129 @@
-<p>
-  game works!
-</p>
+<!--<div id="demo"><h2>This Page is a test Player 2.</h2></div>-->
+<!--<button type="button" (click)="startStreams()"   >start streams</button>-->
+<div id="body">
+  <div id="container">
+    <!-- Header -->
+    <div id="header">
+      EECS448 Project 3 With Angular
+    </div>
+    <!-- Container for game and chatbox -->
+    <div id="main">
+      <!-- Game screen -->
+      <div id="game">
+        <table id="board">
+          <tr>
+            <td>
+              <label for="r0c0">
+                <div class="boardPlace" id="r0c0" (click)="sendMove(0,0)"
+                     [ngClass]="{'o-img': boardSpots[0][0].marker == 'O', 'x-img': boardSpots[0][0].marker == 'X', 'blank-img': boardSpots[0][0].marker == 'blank', 'marked': boardSpots[0][0].marked }">
+                </div>
+              </label>
+            </td>
+            <td>
+              <label for="r0c1">
+                <div class="boardPlace" id="r0c1" (click)="sendMove(0,1)"
+                     [ngClass]="{'o-img': boardSpots[0][1].marker == 'O', 'x-img': boardSpots[0][1].marker == 'X', 'blank-img': boardSpots[0][1].marker == 'blank', 'marked': boardSpots[0][1].marked }">
+                </div>
+              </label>
+            </td>
+            <td>
+              <label for="r0c2">
+                <div class="boardPlace" id="r0c2" (click)="sendMove(0,2)"
+                     [ngClass]="{'o-img': boardSpots[0][2].marker == 'O', 'x-img': boardSpots[0][2].marker == 'X', 'blank-img': boardSpots[0][2].marker == 'blank', 'marked': boardSpots[0][2].marked }">
+                </div>
+              </label>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="r1c0">
+                <div class="boardPlace" id="r1c0" (click)="sendMove(1,0)"
+                     [ngClass]="{'o-img': boardSpots[1][0].marker == 'O', 'x-img': boardSpots[1][0].marker == 'X', 'blank-img': boardSpots[1][0].marker == 'blank', 'marked': boardSpots[1][0].marked }">
+                </div>
+              </label>
+            </td>
+            <td>
+              <label for="r1c1">
+                <div class="boardPlace" id="r1c1" (click)="sendMove(1,1)"
+                     [ngClass]="{'o-img': boardSpots[1][1].marker == 'O', 'x-img': boardSpots[1][1].marker == 'X', 'blank-img': boardSpots[1][1].marker == 'blank', 'marked': boardSpots[1][1].marked }">
+                </div>
+              </label>
+            </td>
+            <td>
+              <label for="r1c2">
+                <div class="boardPlace" id="r1c2" (click)="sendMove(1,2)"
+                     [ngClass]="{'o-img': boardSpots[1][2].marker == 'O', 'x-img': boardSpots[1][2].marker == 'X', 'blank-img': boardSpots[1][2].marker == 'blank', 'marked': boardSpots[1][2].marked }">
+                </div>
+              </label>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="r2c0">
+                <div class="boardPlace" id="r2c0" (click)="sendMove(2,0)"
+                     [ngClass]="{'o-img': boardSpots[2][0].marker == 'O', 'x-img': boardSpots[2][0].marker == 'X', 'blank-img': boardSpots[2][0].marker == 'blank', 'marked': boardSpots[2][0].marked }">
+                </div>
+              </label>
+            </td>
+            <td>
+              <label for="r2c1">
+                <div class="boardPlace" id="r2c1" (click)="sendMove(2,1)"
+                     [ngClass]="{'o-img': boardSpots[2][1].marker == 'O', 'x-img': boardSpots[2][1].marker == 'X', 'blank-img': boardSpots[2][1].marker == 'blank', 'marked': boardSpots[2][1].marked }">
+                </div>
+              </label>
+            </td>
+            <td>
+              <label for="r2c2">
+                <div class="boardPlace" id="r2c2" (click)="sendMove(2,2)"
+                     [ngClass]="{'o-img': boardSpots[2][2].marker == 'O', 'x-img': boardSpots[2][2].marker == 'X', 'blank-img': boardSpots[2][2].marker == 'blank', 'marked': boardSpots[2][2].marked }">
+                </div>
+              </label>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <!-- Chatbox -->
+      <div id="chat">
+        <div id="chat-messages">
+          <!--<div class="message"><strong>(Time) User: </strong>Message</div>-->
+          <!--<div class="message"><strong>(Time) User: </strong>Message</div>-->
+          <!--<div class="message"><strong>(Time) User: </strong>Message</div>-->
+          <!--<div class="message"><strong>(Time) User: </strong>Message</div>-->
+          <!--<div class="message"><strong>(Time) User: </strong>Message</div>-->
+          <!--<div class="message"><strong>(Time) User: </strong>Message</div>-->
+          <!--<div class="message"><strong>(Time) User: </strong>Message</div>-->
+          <!--<div class="message"><strong>(Time) User: </strong>Message</div>-->
+        </div>
+        <div id="chat-entrybox">
+          <input id="send" name="send" type="text" placeholder="Enter a message here...">
+        </div>
+      </div>
+      <!-- Sidebar -->
+      <div id="sidebar">
+        <div class="sidebar-header">Player Select</div>
+        <!-- Label solution from http://stackoverflow.com/questions/7727255/how-can-i-make-an-html-radiobutton-with-a-big-target-area -->
+        <label>
+          <div class="sidebar-item">
+            <input id="p1" name="player" type="radio" [(ngModel)]="currentPlayer" [value]="'P1'"
+                   [checked]="currentPlayer == 'P1'" (click)="changeIcon('P1')">Player 1
+          </div>
+        </label>
+        <label>
+          <div class="sidebar-item">
+            <input id="p2" name="player" type="radio" [(ngModel)]="currentPlayer" [value]="'P2'"
+                   [checked]="currentPlayer == 'P2'" (click)="changeIcon('P2')">Player 2
+          </div>
+        </label>
+        <div class="sidebar-header">Controls</div>
+        <div class="sidebar-buttons">
+          <input type="reset" value="Start Stream" (click)="startStreams()">
+          <input type="submit" value="Start Game" (click)="sendCommand('startGame', startGame())">
+          <!--<input type="submit" value="Start Game">-->
+          <input type="reset" value="Stop Stream" (click)="stopStreams()">
+        </div>
+        <div class="sidebar-header">Turn: {{playerTurn}} <span id="playerTurn"></span></div>
+        <div class="sidebar-header"><span id="victoryMsg">{{victoryMsg}}</span></div>
+      </div>
+    </div>
+  </div>
+</div>
