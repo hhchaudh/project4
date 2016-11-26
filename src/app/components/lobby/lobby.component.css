@@ -269,7 +269,7 @@
 /*** Sidebar ***/
 #sidebar {
   width: 350px;
-  height: calc(100% - 79px);
+  height: calc(100% - 137px);
   padding: 0;
   margin: 0;
   list-style: none;
@@ -391,8 +391,8 @@
 
 #sidebar-buttons {
   width: 350px;
-  height: 58px;
-  /*padding: 0 0 20px;*/
+  height: 116px;
+  padding: 0 0 20px;
   margin: 0;
   list-style: none;
   position: relative;
@@ -414,7 +414,8 @@
   border-top: 1px solid #2C2F33;
 }
 
-#sidebar-buttons input[type=submit] {
+/* Button press effect from http://www.w3schools.com/css/css3_buttons.asp */
+#sidebar-buttons input[type=reset], #sidebar-buttons input[type=submit] {
   width: 280px;
   height: auto;
   padding: 10px;
@@ -427,25 +428,46 @@
   font-size: 12pt;
   font-weight: bold;
   color: #FFFFFF;
-  background-color: #428ABD;
 
   -webkit-border-radius: 5px;
   border-radius: 5px;
   border: 0;
 }
 
-#sidebar-buttons input[type=submit]:hover {
+#sidebar-buttons input[type=reset]:hover, #sidebar-buttons input[type=submit]:hover {
   cursor: pointer;
   color: #FFFFFF;
-  background-color: #50A7E5;
 }
 
-#sidebar-buttons input[type=submit]:active {
+#sidebar-buttons input[type=reset]:active, #sidebar-buttons input[type=submit]:active {
   transition: .0s ease-in-out;
   -moz-transition: .0s ease-in-out;
   -webkit-transition: .0s ease-in-out;
 
   cursor: pointer;
   color: #FFFFFF;
+}
+
+#sidebar-buttons input[type=reset] {
+  background-color: #B22626;
+}
+
+#sidebar-buttons input[type=reset]:hover {
+  background-color: #F23333;
+}
+
+#sidebar-buttons input[type=reset]:active {
+  background-color: #721919;
+}
+
+#sidebar-buttons input[type=submit] {
+  background-color: #428ABE;
+}
+
+#sidebar-buttons input[type=submit]:hover {
+  background-color: #50A7E5;
+}
+
+#sidebar-buttons input[type=submit]:active {
   background-color: #285473;
 }
