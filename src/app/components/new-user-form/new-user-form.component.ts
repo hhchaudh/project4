@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-new-user-form',
@@ -7,9 +8,24 @@ import { Component, OnInit } from '@angular/core';
 })
 export class NewUserFormComponent implements OnInit {
 
-  constructor() { }
+  private showPassWarning: boolean;
+
+  constructor(private router: Router) {
+    this.showPassWarning = false;
+  }
 
   ngOnInit() {
   }
 
+  onSubmit(formValue: any) {
+    console.log(formValue);
+    if(formValue.pass === formValue.passConfirm) {
+      this.showPassWarning = false;
+      this.router.navigate(['/lobby']);
+    } else {
+      this.showPassWarning = true;
+    }
+
+    return false;
+  }
 }
