@@ -6,7 +6,8 @@
       <form #f="ngForm" (ngSubmit)="onSubmit(f.value)">
         <input id="user" name="user" type="text" placeholder="Username" required ngModel>
         <input id="pass" name="pass" type="password" placeholder="Password" required ngModel>
-        <input id="pass-confirm" name="pass-confirm" type="password" placeholder="Confirm password" required ngModel>
+        <input id="pass-confirm" name="passConfirm" type="password" placeholder="Confirm password" required ngModel>
+        <div *ngIf="showPassWarning">Passwords Must Match!</div>
         <input id="loginBtn" type="submit" value="Create and log in">
       </form>
       <input id="logoutBtn" type="reset" value="Back" [routerLink]="['/login']">
