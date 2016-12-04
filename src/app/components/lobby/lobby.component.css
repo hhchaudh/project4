@@ -389,6 +389,10 @@
   background-color: #3F464D;
 }
 
+#sendBtn {
+  display: none;
+}
+
 #sidebar-buttons {
   width: 350px;
   height: 116px;

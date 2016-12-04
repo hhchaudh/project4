@@ -1,4 +1,6 @@
 import {Injectable} from '@angular/core';
+import {User} from "../models/user";
+import {Message} from "../models/message";
 
 @Injectable()
 export class GameService{
@@ -8,6 +10,8 @@ export class GameService{
   jObj = {j_last_index: 0};
   token = 0;
   noSuchUser:boolean = false;
+  users:User[];
+  messages:Message[] = [];
 
   constructor() {
   }
@@ -22,6 +26,27 @@ export class GameService{
     this.token = jsonData.token;
 
     this.startStreams();
+  }
+
+  updateLobby(jsonData) {
+    let userArray = jsonData.users;
+    this.users = [];
+    for(let user of userArray) {
+      let tempUser:User = new User();
+      tempUser.wins = user.wins;
+      tempUser.losses = user.losses;
+      tempUser.status = user.status;
+      tempUser.name = user.name;
+      this.users.push(tempUser);
+    }
+  }
+
+  getUsers() {
+    return this.users;
+  }
+
+  getMessages() {
+    return this.messages;
   }
 
   startGame = function () {
@@ -70,19 +95,24 @@ export class GameService{
     console.log("Error from server says: |" + jsonData.message + "|");
   }
 
-  // newMessage(jsonData) {
-  //   if (!jsonData.message) {
-  //     console.log("Error: a message command needs to have a message!!!");
-  //     return;
-  //   }
-  //
-  //   if (!jsonData.player) {
-  //     console.log("Error: a message command needs to have a player!!!");
-  //     return;
-  //   }
-  //
-  //   console.log("MESSAGE from |" + jsonData.player + "| says |" + jsonData.message + "|");
-  // }
+  newMessage(jsonData) {
+    if (!jsonData.message) {
+      console.log("Error: a message command needs to have a message!!!");
+      return;
+    }
+
+    if (!jsonData.userName) {
+      console.log("Error: a message command needs to have a player!!!");
+      return;
+    }
+
+
+    let tempMessage:Message = new Message();
+    tempMessage.message = jsonData.message;
+    tempMessage.userName = jsonData.userName;
+
+    this.messages.unshift(tempMessage);
+  }
 
   stream_process(streamName, data) {
     let jsonData;
@@ -106,10 +136,11 @@ export class GameService{
       this.error(jsonData);
       return;
     }
-    // if (jsonData.name == "newMessage") {
-    //   newMessage(jsonData);
-    //   return;
-    // }
+
+    if (jsonData.name == "newMessage") {
+      this.newMessage(jsonData);
+      return;
+    }
 
     // if (jsonData.name == "updateGameInfo") {
     //   this.updateGameInfo(jsonData);
@@ -118,6 +149,11 @@ export class GameService{
 
     if( jsonData.name == "userToken" ) {
       this.updateUserToken( jsonData );
+      return;
+    }
+
+    if( jsonData.name === "updateLobbyInfo") {
+      this.updateLobby( jsonData );
       return;
     }
   }
