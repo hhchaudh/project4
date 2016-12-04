@@ -10,77 +10,8 @@
     <div id="main">
       <!-- Game screen -->
       <div id="game">
-        <table id="board">
-          <tr>
-            <td>
-              <label for="r0c0">
-                <div class="boardPlace" id="r0c0" (click)="sendMove(0,0)"
-                     [ngClass]="{'o-img': boardSpots[0][0].marker == 'O', 'x-img': boardSpots[0][0].marker == 'X', 'blank-img': boardSpots[0][0].marker == 'blank', 'marked': boardSpots[0][0].marked }">
-                </div>
-              </label>
-            </td>
-            <td>
-              <label for="r0c1">
-                <div class="boardPlace" id="r0c1" (click)="sendMove(0,1)"
-                     [ngClass]="{'o-img': boardSpots[0][1].marker == 'O', 'x-img': boardSpots[0][1].marker == 'X', 'blank-img': boardSpots[0][1].marker == 'blank', 'marked': boardSpots[0][1].marked }">
-                </div>
-              </label>
-            </td>
-            <td>
-              <label for="r0c2">
-                <div class="boardPlace" id="r0c2" (click)="sendMove(0,2)"
-                     [ngClass]="{'o-img': boardSpots[0][2].marker == 'O', 'x-img': boardSpots[0][2].marker == 'X', 'blank-img': boardSpots[0][2].marker == 'blank', 'marked': boardSpots[0][2].marked }">
-                </div>
-              </label>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label for="r1c0">
-                <div class="boardPlace" id="r1c0" (click)="sendMove(1,0)"
-                     [ngClass]="{'o-img': boardSpots[1][0].marker == 'O', 'x-img': boardSpots[1][0].marker == 'X', 'blank-img': boardSpots[1][0].marker == 'blank', 'marked': boardSpots[1][0].marked }">
-                </div>
-              </label>
-            </td>
-            <td>
-              <label for="r1c1">
-                <div class="boardPlace" id="r1c1" (click)="sendMove(1,1)"
-                     [ngClass]="{'o-img': boardSpots[1][1].marker == 'O', 'x-img': boardSpots[1][1].marker == 'X', 'blank-img': boardSpots[1][1].marker == 'blank', 'marked': boardSpots[1][1].marked }">
-                </div>
-              </label>
-            </td>
-            <td>
-              <label for="r1c2">
-                <div class="boardPlace" id="r1c2" (click)="sendMove(1,2)"
-                     [ngClass]="{'o-img': boardSpots[1][2].marker == 'O', 'x-img': boardSpots[1][2].marker == 'X', 'blank-img': boardSpots[1][2].marker == 'blank', 'marked': boardSpots[1][2].marked }">
-                </div>
-              </label>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label for="r2c0">
-                <div class="boardPlace" id="r2c0" (click)="sendMove(2,0)"
-                     [ngClass]="{'o-img': boardSpots[2][0].marker == 'O', 'x-img': boardSpots[2][0].marker == 'X', 'blank-img': boardSpots[2][0].marker == 'blank', 'marked': boardSpots[2][0].marked }">
-                </div>
-              </label>
-            </td>
-            <td>
-              <label for="r2c1">
-                <div class="boardPlace" id="r2c1" (click)="sendMove(2,1)"
-                     [ngClass]="{'o-img': boardSpots[2][1].marker == 'O', 'x-img': boardSpots[2][1].marker == 'X', 'blank-img': boardSpots[2][1].marker == 'blank', 'marked': boardSpots[2][1].marked }">
-                </div>
-              </label>
-            </td>
-            <td>
-              <label for="r2c2">
-                <div class="boardPlace" id="r2c2" (click)="sendMove(2,2)"
-                     [ngClass]="{'o-img': boardSpots[2][2].marker == 'O', 'x-img': boardSpots[2][2].marker == 'X', 'blank-img': boardSpots[2][2].marker == 'blank', 'marked': boardSpots[2][2].marked }">
-                </div>
-              </label>
-            </td>
-          </tr>
-        </table>
+        <canvas id="player1game" class="game-display" width="300" height="450"></canvas>
+        <canvas id="player2game" class="game-display" width="300" height="450"></canvas>
       </div>
       <!-- Chatbox -->
       <div id="chat">
