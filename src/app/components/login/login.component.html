@@ -6,6 +6,7 @@
       <form #f="ngForm" (ngSubmit)="onSubmit(f.value)">
         <input id="user" name="user" type="text" placeholder="Username" required ngModel>
         <input id="pass" name="pass" type="password" placeholder="Password" required ngModel>
+        <div class="warning" *ngIf="userDoesNotExist">Invalid user name / password</div>
         <input id="loginBtn" type="submit" value="Log in">
       </form>
       <input id="createBtn" type="submit" value="Create user" [routerLink]="['/NewUser']">

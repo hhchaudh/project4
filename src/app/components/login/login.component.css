@@ -118,3 +118,7 @@ input[type=submit]:active {
   color: #FFFFFF;
   background-color: #B2DFFF;
 }
+
+.warning {
+  color: #CCCCCC;
+}

@@ -10,6 +10,7 @@ import { GameComponent } from './components/game/game.component';
 import { NewUserFormComponent } from './components/new-user-form/new-user-form.component';
 import {routing} from "./app.routes";
 import {LocationStrategy, HashLocationStrategy} from "@angular/common";
+import {GameService} from "./services/game.service";
 
 @NgModule({
   declarations: [
@@ -25,7 +26,8 @@ import {LocationStrategy, HashLocationStrategy} from "@angular/common";
     HttpModule,
     routing
   ],
-  providers: [{provide: LocationStrategy, useClass: HashLocationStrategy}],
+  providers: [{provide: LocationStrategy, useClass: HashLocationStrategy},
+  GameService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

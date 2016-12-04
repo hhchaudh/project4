@@ -135,3 +135,7 @@ input[type=reset]:hover {
 input[type=reset]:active {
   background-color: #F23333;
 }
+
+.warning {
+  color: #CCCCCC;
+}
