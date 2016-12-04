@@ -56,6 +56,11 @@ h1 {
   color: #FFFFFF;
 }
 
+p {
+  margin-top: 0;
+  color: #CCCCCC;
+}
+
 /* Textbox styling from http://www.w3schools.com/css/css_form.asp */
 input[type=text], input[type=password] {
   width: calc(100% - 22px);

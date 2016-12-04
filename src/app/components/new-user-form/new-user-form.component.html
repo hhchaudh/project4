@@ -7,6 +7,7 @@
         <input id="user" name="user" type="text" placeholder="Username" required ngModel>
         <input id="pass" name="pass" type="password" placeholder="Password" required ngModel>
         <input id="pass-confirm" name="passConfirm" type="password" placeholder="Confirm password" required ngModel>
+        <p>Caution: Password storage not secure. Do not use a password you use elsewhere.</p>
         <div *ngIf="showPassWarning">Passwords Must Match!</div>
         <div *ngIf="showUserDuplicateWarning">User Already Exists!</div>
         <input id="loginBtn" type="submit" value="Create and log in">
