@@ -1,0 +1,12 @@
+syntax error at /home/jfustos/EECS448/puyoPuyo/gameLobby.pl line 279, near ")
+	{"
+Global symbol "@sortedUsers" requires explicit package name (did you forget to declare "my @sortedUsers"?) at /home/jfustos/EECS448/puyoPuyo/gameLobby.pl line 280.
+syntax error at /home/jfustos/EECS448/puyoPuyo/gameLobby.pl line 282, near "else"
+Global symbol "@sortedUsers" requires explicit package name (did you forget to declare "my @sortedUsers"?) at /home/jfustos/EECS448/puyoPuyo/gameLobby.pl line 284.
+Global symbol "@usersToSort" requires explicit package name (did you forget to declare "my @usersToSort"?) at /home/jfustos/EECS448/puyoPuyo/gameLobby.pl line 284.
+Global symbol "%updateLobbyInfoPacket" requires explicit package name (did you forget to declare "my %updateLobbyInfoPacket"?) at /home/jfustos/EECS448/puyoPuyo/gameLobby.pl line 287.
+Global symbol "@sortedUsers" requires explicit package name (did you forget to declare "my @sortedUsers"?) at /home/jfustos/EECS448/puyoPuyo/gameLobby.pl line 287.
+Global symbol "%updateLobbyInfoPacket" requires explicit package name (did you forget to declare "my %updateLobbyInfoPacket"?) at /home/jfustos/EECS448/puyoPuyo/gameLobby.pl line 289.
+syntax error at /home/jfustos/EECS448/puyoPuyo/gameLobby.pl line 292, near "}"
+syntax error at /home/jfustos/EECS448/puyoPuyo/gameLobby.pl line 306, near "}"
+/home/jfustos/EECS448/puyoPuyo/gameLobby.pl has too many errors.
