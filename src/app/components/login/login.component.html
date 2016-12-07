@@ -3,6 +3,7 @@
     <!-- Container for log in options -->
     <div id="login">
       <h1>Project 4</h1>
+      <div *ngIf="userCreated" class="warning">New user created! Log in now!</div>
       <form #f="ngForm" (ngSubmit)="onSubmit(f.value)">
         <input id="user" name="user" type="text" placeholder="Username" required ngModel>
         <input id="pass" name="pass" type="password" placeholder="Password" required ngModel>

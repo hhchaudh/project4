@@ -10,8 +10,11 @@ export class GameService{
   jObj = {j_last_index: 0};
   token = 0;
   noSuchUser:boolean = false;
+  userCreated:boolean = false;
   users:User[];
   messages:Message[] = [];
+  where:number = 0;
+  gameToken:number = 0;
 
   constructor() {
   }
@@ -25,19 +28,45 @@ export class GameService{
 
     this.token = jsonData.token;
 
-    this.startStreams();
+    this.startStreams("0000000000");
   }
 
   updateLobby(jsonData) {
-    let userArray = jsonData.users;
-    this.users = [];
-    for(let user of userArray) {
+
+    if(!jsonData.users) {
+      console.log("Error: no users found!");
+      return;
+    }
+
+    let tempUserArray = [];
+    for(let user of jsonData.users) {
       let tempUser:User = new User();
       tempUser.wins = user.wins;
       tempUser.losses = user.losses;
       tempUser.status = user.status;
       tempUser.name = user.name;
-      this.users.push(tempUser);
+      tempUserArray.push(tempUser);
+    }
+
+    if(this.users == null ||(tempUserArray.length != this.users.length)) {
+      this.users = tempUserArray;
+    } else {
+      for(let newUser of tempUserArray) {
+        let sameUsersAndStatus:boolean = false;
+
+        for(let currentUser of this.users) {
+          if(currentUser.name === newUser.name) {
+            if(currentUser.status === newUser.status) {
+              sameUsersAndStatus = true;
+            }
+          }
+        }
+
+        if(!sameUsersAndStatus) {
+          this.users = tempUserArray;
+          break;
+        }
+      }
     }
   }
 
@@ -54,7 +83,7 @@ export class GameService{
   };
 
   getStreamData = function () {
-    return JSON.stringify({"name": "getGameStream", "where": "0000000000", "userToken": this.token});
+    return JSON.stringify({"name": "getGameStream", "where": this.where, "userToken": this.token});
   };
 
   login = function () {
@@ -216,7 +245,8 @@ export class GameService{
     xhttp.send(postData);
   }
 
-  startStreams() {
+  startStreams(where) {
+    this.where = where;
     this.keepStreamsGoing = true;
     this.sendCommand("stream1", this.getStreamData());
     this.sendCommand("stream2", this.getStreamData());

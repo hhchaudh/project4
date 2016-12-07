@@ -10,7 +10,7 @@
         <p>Caution: Password storage not secure. Do not use a password you use elsewhere.</p>
         <div class="warning" *ngIf="showPassWarning">Passwords Must Match!</div>
         <div class="warning" *ngIf="showUserDuplicateWarning">User Already Exists!</div>
-        <input id="loginBtn" type="submit" value="Create and log in">
+        <input id="loginBtn" type="submit" value="Create User">
       </form>
       <input id="logoutBtn" type="reset" value="Back" [routerLink]="['/login']">
     </div>

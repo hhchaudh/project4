@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {Router} from "@angular/router";
 import {Response, Headers, Http} from "@angular/http";
 import 'rxjs/add/operator/map';
+import {GameService} from "../../services/game.service";
 
 @Component({
   selector: 'app-new-user-form',
@@ -14,7 +15,7 @@ export class NewUserFormComponent implements OnInit {
   private showUserDuplicateWarning: boolean;
   private newUserRequestObj = {"name":"createUser", "where":"0000000000",  "userName":"", "password":"" };
 
-  constructor(private router: Router, private http: Http) {
+  constructor(private router: Router, private http: Http, private gameService:GameService) {
     this.showPassWarning = false;
     this.showUserDuplicateWarning = false;
   }
@@ -61,8 +62,9 @@ export class NewUserFormComponent implements OnInit {
             this.showUserDuplicateWarning = true;
             console.log("The user name exists");
           } else {
-            this.router.navigate(['/lobby']);
+            this.router.navigate(['/login']);
             this.showUserDuplicateWarning = false;
+            this.gameService.userCreated = true;
           }
         }
       );

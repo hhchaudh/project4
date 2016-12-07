@@ -23,6 +23,7 @@ export class LoginComponent implements OnInit {
 
   onSubmit(formValue: any) {
     this.userDoesNotExist = false;
+    this.gameService.userCreated = false;
     this.gameService.resetUserToken();
     console.log(formValue);
     this.gameService.sendCommand("login", this.login(formValue.user, formValue.pass));
@@ -36,5 +37,9 @@ export class LoginComponent implements OnInit {
     }, 500);
 
     return false;
+  }
+
+  get userCreated(): boolean {
+    return this.gameService.userCreated;
   }
 }

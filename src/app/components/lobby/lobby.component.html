@@ -73,14 +73,15 @@
             <div *ngIf="user.status === 'JOINABLE'" class="player-status"><img
               src="./assets/lobby-img/status-green.svg"> Joinable
             </div>
-            <div *ngIf="user.status === 'INGAME'" class="player-status"><img src="./assets/lobby-img/status-red.svg">
+            <div *ngIf="user.status === 'IN-GAME'" class="player-status"><img src="./assets/lobby-img/status-red.svg">
               In-game
             </div>
           </div>
         </div>
       </div>
       <div id="sidebar-buttons">
-        <input id="gameBtn" type="submit" value="Join Game" [routerLink]="['/game']">
+        <input id="createGameBtn" type="submit" value="Create Game">
+        <input id="joinGameBtn" type="submit" value="Join Game" [routerLink]="['/game']">
         <input id="logoutBtn" type="reset" value="Log out" [routerLink]="['/login']">
       </div>
     </div>
