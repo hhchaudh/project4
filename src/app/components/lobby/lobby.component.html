@@ -65,7 +65,7 @@
           <!--<div class="player-name">Player 4</div>-->
           <!--<div class="player-status"><img src="./assets/lobby-img/status-red.svg"> In-game</div>-->
           <!--</div>-->
-          <div *ngFor="let user of users" class="sidebar-item">
+          <div *ngFor="let user of users" class="sidebar-item" (click)="setSelectedPlayer(user)" [ngClass]="{'change-background': user.name === selectedPlayer}">
             <div class="player-name">{{user.name}}</div>
             <div *ngIf="user.status === 'LOBBY'" class="player-status"><img src="./assets/lobby-img/status-blue.svg">
               Main lobby
@@ -80,9 +80,9 @@
         </div>
       </div>
       <div id="sidebar-buttons">
-        <input id="createGameBtn" type="submit" value="Create Game">
-        <input id="joinGameBtn" type="submit" value="Join Game" [routerLink]="['/game']">
-        <input id="logoutBtn" type="reset" value="Log out" [routerLink]="['/login']">
+        <input *ngIf="joinableGame" id="joinGameBtn" type="submit" value="Join Game" [routerLink]="['/game']">
+        <input id="createGameBtn" type="submit" value="Create Game" (click)="createGame()" [routerLink]="['/game']">
+        <input id="logoutBtn" type="reset" value="Log out" (click)="logOff()" [routerLink]="['/login']">
       </div>
     </div>
   </div>
