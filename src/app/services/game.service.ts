@@ -3,18 +3,18 @@ import {User} from "../models/user";
 import {Message} from "../models/message";
 
 @Injectable()
-export class GameService{
+export class GameService {
   keepStreamsGoing = true;
   times = 0;
   total = 0;
   jObj = {j_last_index: 0};
   token = 0;
-  noSuchUser:boolean = false;
-  userCreated:boolean = false;
-  users:User[];
-  messages:Message[] = [];
-  where:number = 0;
-  gameToken:number = 0;
+  noSuchUser: boolean = false;
+  userCreated: boolean = false;
+  users: User[];
+  messages: Message[] = [];
+  where = "";
+  gameToken = 0;
 
   constructor() {
   }
@@ -31,16 +31,27 @@ export class GameService{
     this.startStreams("0000000000");
   }
 
+  updateGameToken(jsonData) {
+    console.log("Game Created!");
+    if (!jsonData.token) {
+      console.log("No game token found!");
+      return;
+    }
+
+    this.gameToken = jsonData.token;
+    this.startStreams(this.gameToken);
+  }
+
   updateLobby(jsonData) {
 
-    if(!jsonData.users) {
+    if (!jsonData.users) {
       console.log("Error: no users found!");
       return;
     }
 
     let tempUserArray = [];
-    for(let user of jsonData.users) {
-      let tempUser:User = new User();
+    for (let user of jsonData.users) {
+      let tempUser: User = new User();
       tempUser.wins = user.wins;
       tempUser.losses = user.losses;
       tempUser.status = user.status;
@@ -48,21 +59,21 @@ export class GameService{
       tempUserArray.push(tempUser);
     }
 
-    if(this.users == null ||(tempUserArray.length != this.users.length)) {
+    if (this.users == null || (tempUserArray.length != this.users.length)) {
       this.users = tempUserArray;
     } else {
-      for(let newUser of tempUserArray) {
-        let sameUsersAndStatus:boolean = false;
+      for (let newUser of tempUserArray) {
+        let sameUsersAndStatus: boolean = false;
 
-        for(let currentUser of this.users) {
-          if(currentUser.name === newUser.name) {
-            if(currentUser.status === newUser.status) {
+        for (let currentUser of this.users) {
+          if (currentUser.name === newUser.name) {
+            if (currentUser.status === newUser.status) {
               sameUsersAndStatus = true;
             }
           }
         }
 
-        if(!sameUsersAndStatus) {
+        if (!sameUsersAndStatus) {
           this.users = tempUserArray;
           break;
         }
@@ -81,6 +92,15 @@ export class GameService{
   startGame = function () {
     return JSON.stringify({"name": "startGame", "player": this.currentPlayer});
   };
+
+  createGame() {
+    if (this.token === 0) {
+      return 0;
+    }
+
+    let createGameData = JSON.stringify({"name": "createGame", "where": "0000000000", "userToken": this.token});
+    this.sendCommand("createGame", createGameData);
+  }
 
   getStreamData = function () {
     return JSON.stringify({"name": "getGameStream", "where": this.where, "userToken": this.token});
@@ -118,7 +138,7 @@ export class GameService{
       return;
     }
 
-    if(jsonData.display) {
+    if (jsonData.display) {
       this.noSuchUser = true;
     }
     console.log("Error from server says: |" + jsonData.message + "|");
@@ -136,11 +156,20 @@ export class GameService{
     }
 
 
-    let tempMessage:Message = new Message();
+    let tempMessage: Message = new Message();
     tempMessage.message = jsonData.message;
     tempMessage.userName = jsonData.userName;
 
     this.messages.unshift(tempMessage);
+  }
+
+  logOff() {
+    if (this.token == 0) {
+      return;
+    }
+
+    let logOffData = JSON.stringify({"name": "logOff", "where": "0000000000", "userToken": this.token});
+    this.sendCommand("logOff", logOffData);
   }
 
   stream_process(streamName, data) {
@@ -176,13 +205,18 @@ export class GameService{
     //   return;
     // }
 
-    if( jsonData.name == "userToken" ) {
-      this.updateUserToken( jsonData );
+    if (jsonData.name == "userToken") {
+      this.updateUserToken(jsonData);
       return;
     }
 
-    if( jsonData.name === "updateLobbyInfo") {
-      this.updateLobby( jsonData );
+    if (jsonData.name === "updateLobbyInfo") {
+      this.updateLobby(jsonData);
+      return;
+    }
+
+    if (jsonData.name === "gameToken") {
+      this.updateGameToken(jsonData);
       return;
     }
   }
@@ -205,7 +239,6 @@ export class GameService{
 
       let gameDataFormat = /<==(.*?)==>/;
       let curr_response = xhttp.responseText.substring(last_index, curr_index);
-      console.log(curr_response);
       let match: any;
 
       while (match = gameDataFormat.exec(curr_response)) {
@@ -230,9 +263,17 @@ export class GameService{
         let average = this.total / this.times;
         console.log("took: " + totalTime + " average: " + average);
 
-        if (j_stream_name == "stream1" || j_stream_name == "stream2") {
+        if (j_stream_name === "stream1" || j_stream_name === "stream2" || j_stream_name === "stream3" || j_stream_name === "stream4") {
+          if (this.gameToken === 0 && (j_stream_name === "stream3" || j_stream_name === "stream4")) {
+            return;
+          }
+
+          if (this.token === 0) {
+            return;
+          }
+
           if (this.keepStreamsGoing) {
-            this.sendCommand(j_stream_name, this.getStreamData());
+            this.sendCommand(j_stream_name, postData);
           }
         }
       }
@@ -246,10 +287,18 @@ export class GameService{
   }
 
   startStreams(where) {
-    this.where = where;
+    let getStreamData = JSON.stringify({"name":"getGameStream", "where":where, "userToken":this.token });
     this.keepStreamsGoing = true;
-    this.sendCommand("stream1", this.getStreamData());
-    this.sendCommand("stream2", this.getStreamData());
+
+    if (this.where === "0000000000") {
+      this.sendCommand("stream1", getStreamData);
+      this.sendCommand("stream2", getStreamData);
+    } else {
+      console.log(getStreamData);
+      this.sendCommand("stream3", getStreamData);
+      this.sendCommand("stream4", getStreamData);
+    }
+
   }
 
 
