@@ -107,6 +107,17 @@ export class GameService {
 
     let createGameData = JSON.stringify({"name": "createGame", "where": "0000000000", "userToken": this.token});
     this.sendCommand("createGame", createGameData);
+    this.resetMessages();
+  }
+
+  joinGame(opposingPlayer) {
+    if(this.token === 0) {
+      return 0;
+    }
+
+    let joinGameData = JSON.stringify({"name":"joinGame", "where":"0000000000", "userToken":this.token, "userName":opposingPlayer});
+    this.sendCommand("joinGame", joinGameData);
+    this.resetMessages();
   }
 
   getTimeString() {

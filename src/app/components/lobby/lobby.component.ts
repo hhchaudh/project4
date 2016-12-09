@@ -45,7 +45,11 @@ export class LobbyComponent implements OnInit {
 
   createGame() {
     this.gameService.createGame();
-    this.gameService.resetMessages();
+    this.router.navigate(["/game"]);
+  }
+
+  joinGame() {
+    this.gameService.joinGame(this.selectedPlayer);
     this.router.navigate(["/game"]);
   }
 
