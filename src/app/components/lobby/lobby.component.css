@@ -70,14 +70,8 @@
 }
 
 /*** Game interface ***/
-#lobby-menu {
-  width: calc(100% - 350px);
-  height: calc(100% - 300px);
-  overflow: none;
-}
-
-.lobby-header {
-  width: calc(100% - 80px);
+#main-header {
+  width: calc(100% - 430px);
   height: auto;
   padding: 20px 40px;
   margin: 0;
@@ -88,92 +82,7 @@
   border-bottom: 1px solid #DDDDDD;
 }
 
-.lobby-subheader {
-  width: 100%;
-  height: auto;
-  padding: 10px 0px;
-  margin: 0;
-  position: relative;
-
-  font-size: 12pt;
-
-  display: -webkit-box;
-  display: -moz-box;
-  display: -ms-flexbox;
-  display: -webkit-flex;
-  display: flex;
-
-  -webkit-flex-flow: row nowrap;
-  flex-flow: row nowrap;
-
-  border-bottom: 1px solid #DDDDDD;
-}
-
-#lobbies {
-  width: 100%;
-  height: calc(100% - 112px);
-  padding: 0;
-  margin: 0;
-  position: relative;
-  list-style: none;
-  overflow: auto;
-
-  font-size: 14pt;
-
-  display: -webkit-box;
-  display: -moz-box;
-  display: -ms-flexbox;
-  display: -webkit-flex;
-  display: flex;
-
-  -webkit-flex-flow: column nowrap;
-  flex-flow: column nowrap;
-  justify-content: flex-start;
-
-  color: #555E66;
-  background-color: #FFFFFF;
-}
-
-.lobby {
-  width: 100%;
-  min-height: 21px;
-  padding: 20px 0px;
-  margin: 0;
-  opacity: 0.6;
-
-  transition: .5s ease-in-out;
-  -moz-transition: .5s ease-in-out;
-  -webkit-transition: .5s ease-in-out;
-
-  display: -webkit-box;
-  display: -moz-box;
-  display: -ms-flexbox;
-  display: -webkit-flex;
-  display: flex;
-
-  -webkit-flex-flow: row nowrap;
-  flex-flow: row nowrap;
-
-  border-bottom: 1px solid #DDDDDD;
-}
-
-.lobby:hover {
-  cursor: pointer;
-  opacity: 1;
-  color: inherit;
-  background-color: #DDDDDD;
-}
-
-.lobby-name {
-  width: 320px;
-  height: auto;
-  padding: 0px 40px;
-  margin: 0;
-  position: relative;
-}
-
 /*** Chatbox ***/
-
 .red-color {
   color: red;
 }
@@ -184,7 +93,7 @@
 
 #chat {
   width: calc(100% - 350px);
-  height: 300px;
+  height: calc(100% - 72px);
   padding: 0;
   margin: 0;
   list-style: none;
@@ -204,7 +113,7 @@
 
 #chat-messages {
   width: calc(100% - 20px);
-  height: calc(100% - 83px);
+  height: calc(100% - 103px);
   padding: 10px;
   margin: 0;
   overflow: auto;
@@ -229,13 +138,13 @@
   border-radius: 5px;
   border: 1px solid #DDDDDD;
   margin: 5px;
-  padding: 5px;
+  padding: 10px;
 }
 
 #chat-entrybox {
-  width: calc(100% - 20px);
+  width: calc(100% - 40px);
   height: auto;
-  padding: 10px;
+  padding: 20px;
   margin: 0;
 }
 

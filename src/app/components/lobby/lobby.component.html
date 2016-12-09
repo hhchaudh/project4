@@ -4,39 +4,24 @@
     <div id="header">
       EECS448 Project 4
     </div>
-    <!-- Container for lobbies and chatbox -->
+    <!-- Container for chatbox -->
     <div id="main">
-      <!-- Game screen -->
-      <div id="lobby-menu">
-        <div class="lobby-header">Game Lobbies</div>
-        <div class="lobby-subheader">
-          <div class="lobby-name">Name</div>
-          <div class="lobby-header-status">Status</div>
-        </div>
-        <div id="lobbies">
-          <div class="lobby">
-            <div class="lobby-name">$host1's lobby</div>
-            <div class="lobby-status"><img src="./assets/lobby-img/status-green.svg"> Open</div>
-          </div>
-          <div class="lobby">
-            <div class="lobby-name">$host2's lobby</div>
-            <div class="lobby-status"><img src="./assets/lobby-img/status-yellow.svg"> Full</div>
-          </div>
-          <div class="lobby">
-            <div class="lobby-name">$host3's lobby</div>
-            <div class="lobby-status"><img src="./assets/lobby-img/status-red.svg"> In-game</div>
-          </div>
-        </div>
-      </div>
+      <div id="main-header">Main Lobby</div>
       <!-- Chatbox -->
       <div id="chat">
         <div id="chat-messages">
           <div *ngFor="let message of messages" class="message"><strong>{{message.userName}}: </strong>{{message.message}}
           </div>
+          <div class="message"><strong>userName: </strong>message
+          </div>
+          <div class="message"><strong>userName: </strong>message
+          </div>
+          <div class="message"><strong>userName: </strong>message
+          </div>
         </div>
         <div id="chat-entrybox">
           <form #f="ngForm" (ngSubmit)="onSubmit(f)">
-            <input id="send" name="message" type="text" placeholder="Enter a message here..." ngModel>
+            <input id="send" name="message" type="text" placeholder="Type your message here..." ngModel>
             <input id="sendBtn" value="sendBtn" type="submit">
           </form>
         </div>
