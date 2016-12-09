@@ -17,16 +17,13 @@ export class LoginComponent implements OnInit {
 
   }
 
-  login = function (userName:any, password:any) {
-    return JSON.stringify({"name":"login","where":"0000000000","userName":userName, "password":password });
-  };
-
   onSubmit(formValue: any) {
+    let loginData = JSON.stringify({"name":"login","where":"0000000000","userName":formValue.user, "password":formValue.pass});
     this.userDoesNotExist = false;
     this.gameService.userCreated = false;
     this.gameService.resetUserToken();
     console.log(formValue);
-    this.gameService.sendCommand("login", this.login(formValue.user, formValue.pass));
+    this.gameService.sendCommand("login", loginData);
 
     window.setTimeout(() => {
       if(this.gameService.getUserToken() != 0) {

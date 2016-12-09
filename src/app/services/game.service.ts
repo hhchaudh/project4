@@ -13,7 +13,6 @@ export class GameService {
   userCreated: boolean = false;
   users: User[];
   messages: Message[] = [];
-  where = "";
   gameToken = 0;
 
   constructor() {
@@ -40,6 +39,10 @@ export class GameService {
 
     this.gameToken = jsonData.token;
     this.startStreams(this.gameToken);
+  }
+
+  resetGameToken() {
+    this.gameToken = 0;
   }
 
   updateLobby(jsonData) {
@@ -89,6 +92,10 @@ export class GameService {
     return this.messages;
   }
 
+  resetMessages() {
+    this.messages = [];
+  }
+
   startGame = function () {
     return JSON.stringify({"name": "startGame", "player": this.currentPlayer});
   };
@@ -102,26 +109,10 @@ export class GameService {
     this.sendCommand("createGame", createGameData);
   }
 
-  getStreamData = function () {
-    return JSON.stringify({"name": "getGameStream", "where": this.where, "userToken": this.token});
-  };
-
-  login = function () {
-    return JSON.stringify({"name": "login", "where": "0000000000", "userName": "jfustos", "password": "blorp"});
-  };
-
   getTimeString() {
     let d = new Date();
     let ret = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds() + ":" + d.getMilliseconds();
     return ret;
-  }
-
-  resetNoUserFlag() {
-    this.noSuchUser = false;
-  }
-
-  getNoUserFlag() {
-    return this.noSuchUser;
   }
 
   getUserToken() {
@@ -163,6 +154,39 @@ export class GameService {
     this.messages.unshift(tempMessage);
   }
 
+  sendMessage(messageText) {
+    if(this.token === 0) {
+      return;
+    }
+
+    let where = "0000000000";
+
+    if(this.gameToken != 0) {
+      where = this.gameToken.toString();
+    }
+
+    if(/\S/.test(messageText)) {
+      let sendMessageData = JSON.stringify({"name":"sendMessage", "where":where, "userToken":this.token, "message":messageText});
+      this.sendCommand("message", sendMessageData);
+    }
+  }
+
+  // onSubmit(form:FormGroup) {
+  //   let message:string = form.value.message;
+  //   if(/\S/.test(message)) {
+  //     let sendMessageData = JSON.stringify({
+  //       "name": "sendMessage",
+  //       "where": "0000000000",
+  //       "userToken": this.gameService.token,
+  //       "message": message
+  //     });
+  //     this.gameService.sendCommand("message", sendMessageData);
+  //     form.reset();
+  //   }
+  //
+  //   return false;
+  // }
+
   logOff() {
     if (this.token == 0) {
       return;
@@ -170,6 +194,19 @@ export class GameService {
 
     let logOffData = JSON.stringify({"name": "logOff", "where": "0000000000", "userToken": this.token});
     this.sendCommand("logOff", logOffData);
+    this.resetUserToken();
+    this.resetMessages();
+  }
+
+  gameLogOff() {
+    if(this.token === 0 || this.gameToken === 0) {
+      return;
+    }
+
+    let logOffData = JSON.stringify({"name":"logOff", "where":this.gameToken, "userToken":this.token});
+    this.sendCommand("logOff", logOffData);
+    this.resetMessages();
+    this.resetGameToken();
   }
 
   stream_process(streamName, data) {
@@ -290,7 +327,7 @@ export class GameService {
     let getStreamData = JSON.stringify({"name":"getGameStream", "where":where, "userToken":this.token });
     this.keepStreamsGoing = true;
 
-    if (this.where === "0000000000") {
+    if (where === "0000000000") {
       this.sendCommand("stream1", getStreamData);
       this.sendCommand("stream2", getStreamData);
     } else {

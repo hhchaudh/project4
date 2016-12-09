@@ -16,17 +16,14 @@
       <!-- Chatbox -->
       <div id="chat">
         <div id="chat-messages">
-          <!--<div class="message"><strong>(Time) User: </strong>Message</div>-->
-          <!--<div class="message"><strong>(Time) User: </strong>Message</div>-->
-          <!--<div class="message"><strong>(Time) User: </strong>Message</div>-->
-          <!--<div class="message"><strong>(Time) User: </strong>Message</div>-->
-          <!--<div class="message"><strong>(Time) User: </strong>Message</div>-->
-          <!--<div class="message"><strong>(Time) User: </strong>Message</div>-->
-          <!--<div class="message"><strong>(Time) User: </strong>Message</div>-->
-          <!--<div class="message"><strong>(Time) User: </strong>Message</div>-->
+          <div *ngFor="let message of messages" class="message"><strong>{{message.userName}}: </strong>{{message.message}}
+          </div>
         </div>
         <div id="chat-entrybox">
-          <input id="send" name="send" type="text" placeholder="Enter a message here...">
+          <form #f="ngForm" (ngSubmit)="onSubmit(f)">
+            <input id="send" name="message" type="text" placeholder="Enter a message here..." ngModel>
+            <input id="sendBtn" value="sendBtn" type="submit">
+          </form>
         </div>
       </div>
       <!-- Sidebar -->
@@ -36,19 +33,19 @@
         <label>
           <div class="sidebar-item">
             <input id="p1" name="player" type="radio" [(ngModel)]="currentPlayer" [value]="'P1'"
-                   [checked]="currentPlayer == 'P1'" (click)="changeIcon('P1')">Player 1
+                   [checked]="currentPlayer == 'P1'">Player 1
           </div>
         </label>
         <label>
           <div class="sidebar-item">
             <input id="p2" name="player" type="radio" [(ngModel)]="currentPlayer" [value]="'P2'"
-                   [checked]="currentPlayer == 'P2'" (click)="changeIcon('P2')">Player 2
+                   [checked]="currentPlayer == 'P2'" >Player 2
           </div>
         </label>
         <div class="sidebar-header">Controls</div>
         <div class="sidebar-buttons">
-          <input type="reset" value="Start Stream" (click)="startStreams()">
-          <input type="submit" value="Start Game" (click)="sendCommand('startGame', startGame())">
+          <input type="reset" value="Start Game" (click)="startStreams()">
+          <input type="submit" value="Logout" (click)="gameLogOut()">
           <!--<input type="submit" value="Start Game">-->
           <input type="reset" value="Stop Stream" (click)="stopStreams()">
         </div>

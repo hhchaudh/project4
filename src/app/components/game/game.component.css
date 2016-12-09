@@ -237,6 +237,10 @@
   background-color: #555E66;
 }
 
+#sendBtn {
+  display: none;
+}
+
 .sidebar-header {
   width: 100%;
   height: auto;

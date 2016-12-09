@@ -382,6 +382,10 @@
   border-bottom: 1px solid #2C2F33;
 }
 
+.change-background {
+  background-color: #2C2F33;
+}
+
 .sidebar-item:hover {
   cursor: pointer;
   opacity: 1;
@@ -474,4 +478,8 @@
 
 #sidebar-buttons input[type=submit]:active {
   background-color: #285473;
+}
+
+#joinGameBtn {
+  background-color: lawngreen;
 }

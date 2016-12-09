@@ -1,6 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {GameService} from "../../services/game.service";
 import {FormGroup} from "@angular/forms";
+import {User} from "../../models/user";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-lobby',
@@ -9,8 +11,10 @@ import {FormGroup} from "@angular/forms";
 })
 export class LobbyComponent implements OnInit {
 
+  selectedPlayer: string = "";
+  joinableGame: boolean = false;
 
-  constructor(private gameService: GameService) {
+  constructor(private gameService: GameService, private router: Router) {
 
   }
 
@@ -26,19 +30,27 @@ export class LobbyComponent implements OnInit {
     return this.gameService.getMessages();
   }
 
-  onSubmit(form:FormGroup) {
-    let message:string = form.value.message;
-    if(/\S/.test(message)) {
-      let sendMessageData = JSON.stringify({
-        "name": "sendMessage",
-        "where": "0000000000",
-        "userToken": this.gameService.token,
-        "message": message
-      });
-      this.gameService.sendCommand("message", sendMessageData);
-      form.reset();
-    }
+  onSubmit(form: FormGroup) {
+    let message: string = form.value.message;
+    this.gameService.sendMessage(message);
+    form.reset();
 
     return false;
+  }
+
+  logOff() {
+    this.gameService.logOff();
+    this.router.navigate(["/login"]);
+  }
+
+  createGame() {
+    this.gameService.createGame();
+    this.gameService.resetMessages();
+    this.router.navigate(["/game"]);
+  }
+
+  setSelectedPlayer(player: User) {
+    this.selectedPlayer = player.name;
+    this.joinableGame = (player.status === "JOINABLE");
   }
 }

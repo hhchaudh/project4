@@ -81,8 +81,8 @@
       </div>
       <div id="sidebar-buttons">
         <input *ngIf="joinableGame" id="joinGameBtn" type="submit" value="Join Game" [routerLink]="['/game']">
-        <input id="createGameBtn" type="submit" value="Create Game" (click)="createGame()" [routerLink]="['/game']">
-        <input id="logoutBtn" type="reset" value="Log out" (click)="logOff()" [routerLink]="['/login']">
+        <input id="createGameBtn" type="submit" value="Create Game" (click)="createGame()">
+        <input id="logoutBtn" type="reset" value="Log out" (click)="logOff()">
       </div>
     </div>
   </div>
