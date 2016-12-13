@@ -4,14 +4,13 @@
   <div id="container">
     <!-- Header -->
     <div id="header">
-      EECS448 Project 3 With Angular
+      EECS448 Project 4
     </div>
     <!-- Container for game and chatbox -->
     <div id="main">
       <!-- Game screen -->
       <div id="game">
-        <canvas id="player1game" class="game-display" width="300" height="450"></canvas>
-        <canvas id="player2game" class="game-display" width="300" height="450"></canvas>
+        <canvas #myCanvas class="game-display" width="320" height="240"></canvas>
       </div>
       <!-- Chatbox -->
       <div id="chat">
@@ -29,25 +28,12 @@
       <!-- Sidebar -->
       <div id="sidebar">
         <div class="sidebar-header">Player Select</div>
-        <!-- Label solution from http://stackoverflow.com/questions/7727255/how-can-i-make-an-html-radiobutton-with-a-big-target-area -->
-        <label>
-          <div class="sidebar-item">
-            <input id="p1" name="player" type="radio" [(ngModel)]="currentPlayer" [value]="'P1'"
-                   [checked]="currentPlayer == 'P1'">Player 1
-          </div>
-        </label>
-        <label>
-          <div class="sidebar-item">
-            <input id="p2" name="player" type="radio" [(ngModel)]="currentPlayer" [value]="'P2'"
-                   [checked]="currentPlayer == 'P2'" >Player 2
-          </div>
-        </label>
+        <div *ngFor="let player of players" class="sidebar-item">
+          <div class="player-name">{{player.name}}</div>
+        </div>
         <div class="sidebar-header">Controls</div>
         <div class="sidebar-buttons">
-          <input type="reset" value="Start Game" (click)="startStreams()">
           <input type="submit" value="Logout" (click)="gameLogOut()">
-          <!--<input type="submit" value="Start Game">-->
-          <input type="reset" value="Stop Stream" (click)="stopStreams()">
         </div>
         <div class="sidebar-header">Turn: {{playerTurn}} <span id="playerTurn"></span></div>
         <div class="sidebar-header"><span id="victoryMsg">{{victoryMsg}}</span></div>
