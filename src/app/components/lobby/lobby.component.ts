@@ -19,7 +19,6 @@ export class LobbyComponent implements OnInit {
   }
 
   ngOnInit() {
-
   }
 
   get users(): any {
@@ -45,12 +44,16 @@ export class LobbyComponent implements OnInit {
 
   createGame() {
     this.gameService.createGame();
-    this.router.navigate(["/game"]);
+    window.setTimeout(() => {
+      this.router.navigate(["/game"]);
+    }, 1000);
   }
 
   joinGame() {
     this.gameService.joinGame(this.selectedPlayer);
-    this.router.navigate(["/game"]);
+    window.setTimeout(() => {
+      this.router.navigate(["/game"]);
+    }, 1000);
   }
 
   setSelectedPlayer(player: User) {

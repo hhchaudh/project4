@@ -4,8 +4,12 @@ export class User {
   name:string;
   status:string;
   ready:boolean;
+  totalWins:number;
+  totalLosses:number;
 
   constructor() {
     this.ready = false;
+    this.totalLosses = 0;
+    this.totalWins = 0;
   }
 }

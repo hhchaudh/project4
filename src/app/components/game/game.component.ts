@@ -2,38 +2,32 @@ import {Component, ViewChild, ElementRef, AfterViewInit} from '@angular/core';
 import {GameService} from "../../services/game.service";
 import {Router} from "@angular/router";
 import {FormGroup} from "@angular/forms";
-import {User} from "../../models/user";
 
-class boardSpot {
-  marked: boolean;
-  marker: string;
-
-  constructor() {
-    this.marked = false;
-    this.marker = "blank";
-  }
-}
 
 @Component({
   selector: 'game-root',
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.css'],
-  providers: [boardSpot]
 })
 
 
 export class GameComponent implements AfterViewInit {
-  playerTurn: string = "No One";
-  currentPlayer: string = "P2";
-  victoryMsg: string;
-  @ViewChild("myCanvas") canvasRef:ElementRef;
+  @ViewChild("gameCanvasLeft") canvasLeftRef:ElementRef;
+  @ViewChild("gameCanvasRight") canvasRightRef:ElementRef;
 
   constructor(private gameService:GameService, private router:Router) {
 
   }
 
   ngAfterViewInit() {
-    this.gameService.setCanvas(this.canvasRef.nativeElement);
+    this.gameService.setCanvas(this.canvasLeftRef.nativeElement, this.canvasRightRef.nativeElement);
+    window.setTimeout(() => {
+      this.gameService.getCurrentStatus().subscribe((status: string) => {
+        if(status === "LOBBY") {
+          this.router.navigate(["/lobby"]);
+        }
+      });
+    }, 1000);
   }
 
   gameLogOut() {
@@ -54,6 +48,10 @@ export class GameComponent implements AfterViewInit {
 
   get players(): any {
     return this.gameService.getPlayers();
+  }
+
+  get countDownTimer(): number {
+    return this.gameService.countDown;
   }
 
   newGame() {

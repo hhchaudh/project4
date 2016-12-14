@@ -1,9 +1,15 @@
 import {Injectable} from '@angular/core';
 import {User} from "../models/user";
 import {Message} from "../models/message";
+import {Subject, Observable} from "rxjs";
+
 
 @Injectable()
 export class GameService {
+
+  userName:string = "";
+  currentStatus:string = "";
+  currentStatusSubject: Subject<string> = new Subject<string>();
   keepStreamsGoing = true;
   times = 0;
   total = 0;
@@ -16,8 +22,6 @@ export class GameService {
   messages: Message[] = [];
   lastMessage: Message;
   gameToken = 0;
-  canvas: HTMLCanvasElement;
-  gameContext: CanvasRenderingContext2D;
   blobs = [];
   gameFrame = -1;
   needsRendered = 0;
@@ -31,17 +35,53 @@ export class GameService {
   p2wins = 0;
   p2losses = 0;
   newFrameRequest = 0;
+  canvasLeft: HTMLCanvasElement;
+  canvasRight: HTMLCanvasElement;
+  contextLeft: CanvasRenderingContext2D;
+  contextRight: CanvasRenderingContext2D;
+  blackNormalBlob: HTMLImageElement = new Image();
+  blueNormalBlob: HTMLImageElement = new Image();
+  yellowNormalBlob: HTMLImageElement = new Image();
+  redNormalBlob: HTMLImageElement = new Image();
+  purpleNormalBlob: HTMLImageElement = new Image();
+  greenNormalBlob: HTMLImageElement = new Image();
 
   constructor() {
+    this.blackNormalBlob.src = "./assets/game-img/blob-boulder.png";
+    this.blueNormalBlob.src = "./assets/game-img/blob-blue.png";
+    this.yellowNormalBlob.src = "./assets/game-img/blob-yellow.png";
+    this.redNormalBlob.src = "./assets/game-img/blob-red.png";
+    this.purpleNormalBlob.src = "./assets/game-img/blob-purple.png";
+    this.greenNormalBlob.src = "./assets/game-img/blob-green.png";
   }
 
-  setCanvas(gameCanvas: HTMLCanvasElement) {
-    this.canvas = gameCanvas;
-    this.gameContext = this.canvas.getContext("2d");
-
-    this.gameContext.fillStyle = "black";
-    this.gameContext.fillRect(0, 0, 320, 240);
+  setUserName(name:string) {
+    this.userName = name;
   }
+
+  setCurrentStatus(status: string) {
+    this.currentStatus = status;
+    this.currentStatusSubject.next(status);
+  }
+
+  getCurrentStatus(): Observable<string> {
+    return this.currentStatusSubject.asObservable();
+  }
+
+  setCanvas(gameCanvasLeft: HTMLCanvasElement, gameCanvasRight: HTMLCanvasElement) {
+    this.canvasLeft = gameCanvasLeft;
+    this.contextLeft = this.canvasLeft.getContext("2d");
+
+    this.contextLeft.fillStyle = "black";
+    this.contextLeft.fillRect(0, 0, 320, 240);
+
+    this.canvasRight = gameCanvasRight;
+    this.contextRight = this.canvasRight.getContext("2d");
+
+    this.contextRight.fillStyle = "black";
+    this.contextRight.fillRect(0, 0, 120, 240);
+  }
+
 
   setReady() {
     if (this.gameToken === 0) {
@@ -130,31 +170,34 @@ export class GameService {
   }
 
   renderFrame() {
-    this.gameContext.fillStyle = "grey";
-    this.gameContext.fillRect(0, 0, 320, 240);
+    this.contextLeft.fillStyle = "grey";
+    this.contextLeft.fillRect(0, 0, 320, 240);
 
-    this.gameContext.fillStyle = "black";
-    // boarders
-    this.gameContext.fillRect(120, 0, 3, 240);
-    this.gameContext.fillRect(197, 0, 3, 240);
+    this.contextRight.fillStyle ="grey";
+    this.contextRight.fillRect(0, 0, 120, 240);
 
-    // outter boxs next
-    this.gameContext.fillRect(126, 95, 28, 50);
-    this.gameContext.fillRect(166, 95, 28, 50);
-
-    // outter boxes happy
-    this.gameContext.fillRect(120, 40, 65, 35);
-
-    this.gameContext.fillStyle = "grey";
-    // inner boxes for next
-    this.gameContext.fillRect(128, 97, 24, 46);
-    this.gameContext.fillRect(168, 97, 24, 46);
-
-    // inner boxes for happy
-    this.gameContext.fillRect(123, 43, 59, 29);
-
-    this.gameContext.fillStyle = "black";
-    this.gameContext.font = "20px Georgia";
+    // this.contextLeft.fillStyle = "black";
+    // // boarders
+    // this.contextLeft.fillRect(120, 0, 3, 240);
+    // this.contextLeft.fillRect(197, 0, 3, 240);
+    //
+    // // outter boxs next
+    // this.contextLeft.fillRect(126, 95, 28, 50);
+    // this.contextLeft.fillRect(166, 95, 28, 50);
+    //
+    // // outter boxes happy
+    // this.contextLeft.fillRect(120, 40, 65, 35);
+    //
+    // this.contextLeft.fillStyle = "grey";
+    // // inner boxes for next
+    // this.contextLeft.fillRect(128, 97, 24, 46);
+    // this.contextLeft.fillRect(168, 97, 24, 46);
+    //
+    // // inner boxes for happy
+    // this.contextLeft.fillRect(123, 43, 59, 29);
+    //
+    // this.contextLeft.fillStyle = "black";
+    // this.contextLeft.font = "20px Georgia";
     if (this.countDown > 0) {
       let countText = "";
       if (this.countDown == 1) {
@@ -164,7 +207,7 @@ export class GameService {
         countText = " " + ( this.countDown - 1 );
       }
 
-      this.gameContext.fillText(countText, 145, 200);
+      // this.contextLeft.fillText(countText, 145, 200);
     }
 
     let happyText = "";
@@ -190,7 +233,7 @@ export class GameService {
       }
     }
 
-    this.gameContext.fillText(happyText, 130, 60);
+    // this.contextLeft.fillText(happyText, 130, 60);
 
     if (this.rightHappy == 0) {
       happyText = "happy";
@@ -214,132 +257,131 @@ export class GameService {
       }
     }
 
-    this.gameContext.fillText(happyText, 130, 180);
+    // this.contextLeft.fillText(happyText, 130, 180);
 
 
     for (let i = 0; i < this.blobs.length; i++) {
       let blob = this.blobs[i];
       if (blob && blob.frame != "vanish") {
-        let offset = 0;
+        let context:CanvasRenderingContext2D = this.contextLeft;
         if (blob.side == "right") {
-          offset = 200;
+          context = this.contextRight;
         }
 
         let xPos = (   blob.xPos * 20 ) / 1000;
         let yPos = ( ( blob.yPos - 2000 ) * 20 ) / 1000;
         let color = blob.color;
-        xPos += offset;
 
         if (blob.frame == "normal") {
-          this.drawBlobNormal(this.gameContext, xPos, yPos, color);
+          this.drawBlobNormal(context, xPos, yPos, color);
         }
         else if (blob.frame == "smushed") {
-          this.drawBlobSmushed(this.gameContext, xPos, yPos, color);
+          this.drawBlobSmushed(context, xPos, yPos, color);
         }
         else if (blob.frame == "vertSmushed") {
-          this.drawBlobVertSmushed(this.gameContext, xPos, yPos, color);
+          this.drawBlobVertSmushed(context, xPos, yPos, color);
         }
         else if (blob.frame == "bugEye") {
-          this.drawBugEye(this.gameContext, xPos, yPos, color);
+          this.drawBugEye(context, xPos, yPos, color);
         }
         else if (blob.frame == "blow1") {
-          this.drawBlow(this.gameContext, xPos, yPos, color, 1);
+          this.drawBlow(context, xPos, yPos, color, 1);
         }
         else if (blob.frame == "blow2") {
-          this.drawBlow(this.gameContext, xPos, yPos, color, 2);
+          this.drawBlow(context, xPos, yPos, color, 2);
         }
         else if (blob.frame == "blow3") {
-          this.drawBlow(this.gameContext, xPos, yPos, color, 3);
+          this.drawBlow(context, xPos, yPos, color, 3);
         }
         else if (blob.frame == "blow4") {
-          this.drawBlow(this.gameContext, xPos, yPos, color, 4);
+          this.drawBlow(context, xPos, yPos, color, 4);
         }
         else if (blob.frame == "orb") {
-          this.drawOrb(this.gameContext, xPos, yPos);
+          this.drawOrb(context, xPos, yPos);
         }
         else if (blob.frame == "orbBig") {
-          this.drawOrbBig(this.gameContext, xPos, yPos);
+          this.drawOrbBig(context, xPos, yPos);
         }
         else if (blob.frame == "joinRight") {
-          this.drawJoin(this.gameContext, xPos, yPos, color, "joinRight");
+          this.drawJoin(context, xPos, yPos, color, "joinRight");
         }
         else if (blob.frame == "joinRightLeft") {
-          this.drawJoin(this.gameContext, xPos, yPos, color, "joinRightLeft");
+          this.drawJoin(context, xPos, yPos, color, "joinRightLeft");
         }
         else if (blob.frame == "joinRightUp") {
-          this.drawJoin(this.gameContext, xPos, yPos, color, "joinRightUp");
+          this.drawJoin(context, xPos, yPos, color, "joinRightUp");
         }
         else if (blob.frame == "joinRightDown") {
-          this.drawJoin(this.gameContext, xPos, yPos, color, "joinRightDown");
+          this.drawJoin(context, xPos, yPos, color, "joinRightDown");
         }
         else if (blob.frame == "joinRightLeftUp") {
-          this.drawJoin(this.gameContext, xPos, yPos, color, "joinRightLeftUp");
+          this.drawJoin(context, xPos, yPos, color, "joinRightLeftUp");
         }
         else if (blob.frame == "joinRightLeftDown") {
-          this.drawJoin(this.gameContext, xPos, yPos, color, "joinRightLeftDown");
+          this.drawJoin(context, xPos, yPos, color, "joinRightLeftDown");
         }
         else if (blob.frame == "joinRightUpDown") {
-          this.drawJoin(this.gameContext, xPos, yPos, color, "joinRightUpDown");
+          this.drawJoin(context, xPos, yPos, color, "joinRightUpDown");
         }
         else if (blob.frame == "joinRightLeftUpDowm") {
-          this.drawJoin(this.gameContext, xPos, yPos, color, "joinRightLeftUpDowm");
+          this.drawJoin(context, xPos, yPos, color, "joinRightLeftUpDowm");
         }
         else if (blob.frame == "joinLeft") {
-          this.drawJoin(this.gameContext, xPos, yPos, color, "joinLeft");
+          this.drawJoin(context, xPos, yPos, color, "joinLeft");
         }
         else if (blob.frame == "joinLeftUp") {
-          this.drawJoin(this.gameContext, xPos, yPos, color, "joinLeftUp");
+          this.drawJoin(context, xPos, yPos, color, "joinLeftUp");
         }
         else if (blob.frame == "joinLeftDown") {
-          this.drawJoin(this.gameContext, xPos, yPos, color, "joinLeftDown");
+          this.drawJoin(context, xPos, yPos, color, "joinLeftDown");
         }
         else if (blob.frame == "joinLeftUpDown") {
-          this.drawJoin(this.gameContext, xPos, yPos, color, "joinLeftUpDown");
+          this.drawJoin(context, xPos, yPos, color, "joinLeftUpDown");
         }
         else if (blob.frame == "joinUp") {
-          this.drawJoin(this.gameContext, xPos, yPos, color, "joinUp");
+          this.drawJoin(context, xPos, yPos, color, "joinUp");
         }
         else if (blob.frame == "joinUpDown") {
-          this.drawJoin(this.gameContext, xPos, yPos, color, "joinUpDown");
+          this.drawJoin(context, xPos, yPos, color, "joinUpDown");
         }
         else if (blob.frame == "joinDown") {
-          this.drawJoin(this.gameContext, xPos, yPos, color, "joinDown");
+          this.drawJoin(context, xPos, yPos, color, "joinDown");
         }
-        else if (blob.frame == "que1") {
-          if (blob.side == "left") {
-            this.drawBlobNormal(this.gameContext, 130, 120, color);
-          }
-          else {
-            this.drawBlobNormal(this.gameContext, 170, 120, color);
-          }
-        }
-        else if (blob.frame == "que2") {
-          if (blob.side == "left") {
-            this.drawBlobNormal(this.gameContext, 130, 100, color);
-          }
-          else {
-            this.drawBlobNormal(this.gameContext, 170, 100, color);
-          }
-        }
+        // else if (blob.frame == "que1") {
+        //   if (blob.side == "left") {
+        //     this.drawBlobNormal(this.contextLeft, 130, 120, color);
+        //   }
+        //   else {
+        //     this.drawBlobNormal(this.contextLeft, 170, 120, color);
+        //   }
+        // }
+        // else if (blob.frame == "que2") {
+        //   if (blob.side == "left") {
+        //     this.drawBlobNormal(this.contextLeft, 130, 100, color);
+        //   }
+        //   else {
+        //     this.drawBlobNormal(this.contextLeft, 170, 100, color);
+        //   }
+        // }
       }
 
       if (this.displayWinner) {
-        this.gameContext.fillStyle = "black";
-        this.gameContext.font = "20px Georgia";
+        // this.contextLeft.fillStyle = "black";
+        // this.contextLeft.font = "20px Georgia";
 
         let winText = "Loser!!!";
         if (this.winner == "left") {
           winText = "Winner!!!";
         }
-        this.gameContext.fillText(winText, 40, 40);
-        this.gameContext.fillText(this.p1wins + " - " + this.p1losses, 40, 70);
+        // this.contextLeft.fillText(winText, 40, 40);
+        // this.contextLeft.fillText(this.p1wins + " - " + this.p1losses, 40, 70);
 
         winText = "Loser!!!";
         if (this.winner == "right") {
           winText = "Winner!!!";
         }
-        this.gameContext.fillText(winText, 240, 40);
-        this.gameContext.fillText(this.p2wins + " - " + this.p2losses, 240, 70);
+        // this.contextLeft.fillText(winText, 240, 40);
+        // this.contextLeft.fillText(this.p2wins + " - " + this.p2losses, 240, 70);
       }
 
       this.needsRendered = 0;
@@ -404,10 +446,13 @@ export class GameService {
     let tempUserArray = [];
     for (let user of jsonData.users) {
       let tempUser: User = new User();
-      tempUser.wins = user.wins;
-      tempUser.losses = user.losses;
+      tempUser.totalWins = user.totalWins;
+      tempUser.totalLosses = user.totalLosses;
       tempUser.status = user.status;
       tempUser.name = user.name;
+      if(tempUser.name === this.userName) {
+        this.setCurrentStatus(tempUser.status);
+      }
       tempUserArray.push(tempUser);
     }
 
@@ -417,9 +462,9 @@ export class GameService {
       for (let newUser of tempUserArray) {
         let sameUsersAndStatus: boolean = false;
 
-        for (let currentUser of this.users) {
-          if (currentUser.name === newUser.name) {
-            if (currentUser.status === newUser.status) {
+        for (let user of this.users) {
+          if (user.name === newUser.name) {
+            if (user.status === newUser.status) {
               sameUsersAndStatus = true;
             }
           }
@@ -499,10 +544,6 @@ export class GameService {
     this.messages = [];
   }
 
-  startGame = function () {
-    return JSON.stringify({"name": "startGame", "player": this.currentPlayer});
-  };
-
   createGame() {
     if (this.token === 0) {
       return 0;
@@ -518,20 +559,14 @@ export class GameService {
       return 0;
     }
 
-    let joinGameData = JSON.stringify({
-      "name": "joinGame",
-      "where": "0000000000",
-      "userToken": this.token,
-      "userName": opposingPlayer
-    });
+    let joinGameData = JSON.stringify({"name": "joinGame", "where": "0000000000", "userToken": this.token, "userName": opposingPlayer});
     this.sendCommand("joinGame", joinGameData);
     this.resetMessages();
   }
 
   getTimeString() {
     let d = new Date();
-    let ret = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds() + ":" + d.getMilliseconds();
-    return ret;
+    return (d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds() + ":" + d.getMilliseconds());
   }
 
   getUserToken() {
@@ -724,7 +759,7 @@ export class GameService {
       }
     };
 
-    xhttp.onreadystatechange = (event) => {
+    xhttp.onreadystatechange = () => {
       if (xhttp.readyState == 4 && xhttp.status == 200) {
         let d = new Date();
         console.log("Connection died OK though!!!" + " : " + this.getTimeString());
@@ -838,8 +873,22 @@ export class GameService {
   }
 
   drawBlobNormal(myContext, xPos, yPos, color) {
-    myContext.fillStyle = color;
-    myContext.fillRect(xPos + 2, yPos + 2, 16, 16);
+    if(color === "black") {
+      myContext.drawImage(this.blackNormalBlob, xPos + 2, yPos + 2, 16, 16);
+    } else if(color === "yellow") {
+      myContext.drawImage(this.yellowNormalBlob, xPos + 2, yPos + 2, 16, 16);
+    } else if(color === "blue") {
+      myContext.drawImage(this.blueNormalBlob, xPos + 2, yPos + 2, 16, 16);
+    } else if(color === "red") {
+      myContext.drawImage(this.redNormalBlob, xPos + 2, yPos + 2, 16, 16);
+    } else if(color === "purple") {
+      myContext.drawImage(this.purpleNormalBlob, xPos + 2, yPos + 2, 16, 16);
+    } else if(color === "green") {
+      myContext.drawImage(this.greenNormalBlob, xPos + 2, yPos + 2, 16, 16);
+    } else {
+      myContext.fillStyle = color;
+      myContext.fillRect(xPos + 2, yPos + 2, 16, 16);
+    }
   }
 
   drawBlobSmushed(myContext, xPos, yPos, color) {

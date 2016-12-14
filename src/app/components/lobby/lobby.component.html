@@ -47,7 +47,7 @@
           <!--<div class="player-status"><img src="./assets/lobby-img/status-red.svg"> In-game</div>-->
           <!--</div>-->
           <div *ngFor="let user of users" class="sidebar-item" (click)="setSelectedPlayer(user)" [ngClass]="{'change-background': user.name === selectedPlayer}">
-            <div class="player-name">{{user.name}}</div>
+            <div class="player-name">{{user.name + " (" + user.totalWins + "-" + user.totalLosses + ")"}}</div>
             <div *ngIf="user.status === 'LOBBY'" class="player-status"><img src="./assets/lobby-img/status-blue.svg">
               Main lobby
             </div>

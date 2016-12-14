@@ -14,7 +14,6 @@ export class LoginComponent implements OnInit {
   constructor(private router: Router, private gameService:GameService) { }
 
   ngOnInit() {
-
   }
 
   onSubmit(formValue: any) {
@@ -23,6 +22,7 @@ export class LoginComponent implements OnInit {
     this.gameService.userCreated = false;
     this.gameService.resetUserToken();
     console.log(formValue);
+    this.gameService.setUserName(formValue.user);
     this.gameService.sendCommand("login", loginData);
 
     window.setTimeout(() => {
