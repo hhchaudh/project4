@@ -30,13 +30,19 @@
         <div class="sidebar-header">Player Select</div>
         <div *ngFor="let player of players" class="sidebar-item">
           <div class="player-name">{{player.name}}</div>
+          <div *ngIf="player.ready" class="player-status"><img
+          src="./assets/lobby-img/status-green.svg"> Ready
+        </div>
+          <div *ngIf="!player.ready" class="player-status"><img
+            src="./assets/lobby-img/status-red.svg"> Not Ready
+          </div>
         </div>
         <div class="sidebar-header">Controls</div>
         <div class="sidebar-buttons">
+          <input type="submit" value="New Game" (click)="newGame()">
+          <input type="submit" value="Ready" (click)="setReady()">
           <input type="submit" value="Logout" (click)="gameLogOut()">
         </div>
-        <div class="sidebar-header">Turn: {{playerTurn}} <span id="playerTurn"></span></div>
-        <div class="sidebar-header"><span id="victoryMsg">{{victoryMsg}}</span></div>
       </div>
     </div>
   </div>

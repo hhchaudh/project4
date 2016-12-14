@@ -74,7 +74,7 @@ export class NewUserFormComponent implements OnInit {
     const body = JSON.stringify(user);
     const headers = new Headers();
     headers.append('Content-Type', 'application/json');
-    return this.http.post('https://people.eecs.ku.edu/~jfustos/cgi-bin/myTest.cgi', body, {
+    return this.http.post("https://people.eecs.ku.edu/~jfustos/cgi-bin/altStackAPI.cgi", body, {
       headers: headers
     })
       .map((data: Response) => data)

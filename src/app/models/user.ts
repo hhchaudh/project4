@@ -3,8 +3,9 @@ export class User {
   losses:number;
   name:string;
   status:string;
+  ready:boolean;
 
   constructor() {
-
+    this.ready = false;
   }
 }

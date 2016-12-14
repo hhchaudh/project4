@@ -43,6 +43,25 @@ export class GameService {
     this.gameContext.fillRect(0, 0, 320, 240);
   }
 
+  setReady() {
+    if (this.gameToken === 0) {
+      return;
+    }
+
+    let setReadyData = JSON.stringify({"name": "setReady", "where": this.gameToken, "userToken": this.token});
+    this.sendCommand("setReady", setReadyData);
+  }
+
+
+  newGame() {
+    if (this.gameToken === 0) {
+      return;
+    }
+
+    let newGameData = JSON.stringify({"name": "newGame", "where": this.gameToken, "userToken": this.token});
+    this.sendCommand("newGame", newGameData);
+  }
+
   newFrame(jsonData) {
     if (!jsonData.frame) {
       console.log("Error: no frame received!!!");
@@ -328,16 +347,20 @@ export class GameService {
   }
 
   getNewGameFrame() {
-    if(this.gameToken === 0) {
+    if (this.gameToken === 0) {
       console.log("Requested a new game frame but there is no game!!!");
       return;
     }
 
-    if(this.newFrameRequest != 0) {
+    if (this.newFrameRequest != 0) {
       return;
     }
 
-    let sendGetNewGameFrameData = JSON.stringify({"name":"getNewGameFrame", "where":this.gameToken, "userToken":this.token});
+    let sendGetNewGameFrameData = JSON.stringify({
+      "name": "getNewGameFrame",
+      "where": this.gameToken,
+      "userToken": this.token
+    });
     this.sendCommand("newGameFrame", sendGetNewGameFrameData);
     this.newFrameRequest = 1;
   }
@@ -423,29 +446,41 @@ export class GameService {
       tempUser.losses = user.losses;
       tempUser.status = user.status;
       tempUser.name = user.name;
+      tempUser.ready = user.ready;
       tempUserArray.push(tempUser);
     }
 
-    if (this.players == null || (tempUserArray.length != this.players.length)) {
-      this.players = tempUserArray;
-    } else {
-      for (let newUser of tempUserArray) {
-        let sameUsersAndStatus: boolean = false;
+    // if (this.players == null || (tempUserArray.length != this.players.length)) {
+    //   this.players = tempUserArray;
+    // } else {
+    //   for (let newUser of tempUserArray) {
+    //     let sameUsersAndStatus: boolean = false;
+    //
+    //     for (let currentUser of this.players) {
+    //       if (currentUser.name === newUser.name && currentUser.status === newUser.status) {
+    //         if (currentUser.status === newUser.status) {
+    //           if (currentUser.ready === newUser.ready) {
+    //             sameUsersAndStatus = true;
+    //           }
+    //         }
+    //       }
+    //     }
+    //     if (!sameUsersAndStatus) {
+    //       this.players = tempUserArray;
+    //       this.p1wins = this.players[0].wins;
+    //       this.p1losses = this.players[0].losses;
+    //       this.p2wins = this.players[1].wins;
+    //       this.p2losses = this.players[1].losses;
+    //       break;
+    //     }
+    //   }
+    // }
 
-        for (let currentUser of this.players) {
-          if (currentUser.name === newUser.name) {
-            if (currentUser.status === newUser.status) {
-              sameUsersAndStatus = true;
-            }
-          }
-        }
-
-        if (!sameUsersAndStatus) {
-          this.players = tempUserArray;
-          break;
-        }
-      }
-    }
+    this.players = tempUserArray;
+    this.p1wins = this.players[0].wins;
+    this.p1losses = this.players[0].losses;
+    this.p2wins = this.players[1].wins;
+    this.p2losses = this.players[1].losses;
   }
 
   getUsers() {
@@ -568,22 +603,6 @@ export class GameService {
     }
   }
 
-  // onSubmit(form:FormGroup) {
-  //   let message:string = form.value.message;
-  //   if(/\S/.test(message)) {
-  //     let sendMessageData = JSON.stringify({
-  //       "name": "sendMessage",
-  //       "where": "0000000000",
-  //       "userToken": this.gameService.token,
-  //       "message": message
-  //     });
-  //     this.gameService.sendCommand("message", sendMessageData);
-  //     form.reset();
-  //   }
-  //
-  //   return false;
-  // }
-
   logOff() {
     if (this.token == 0) {
       return;
@@ -673,7 +692,7 @@ export class GameService {
     let d = new Date();
     let xhttp = new XMLHttpRequest();
     //xhttp.open("POST", "https://people.eecs.ku.edu/~jfustos/cgi-bin/ticTacToeCommand.cgi", true);
-    xhttp.open("POST", "https://people.eecs.ku.edu/~jfustos/cgi-bin/myTest.cgi", true);
+    xhttp.open("POST", "https://people.eecs.ku.edu/~jfustos/cgi-bin/altStackAPI.cgi", true);
     this.jObj.j_last_index = 0;
     let j_stream_name = stream_name;
     let packetStart = d.getTime();

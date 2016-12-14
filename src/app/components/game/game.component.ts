@@ -55,4 +55,13 @@ export class GameComponent implements AfterViewInit {
   get players(): any {
     return this.gameService.getPlayers();
   }
+
+  newGame() {
+    this.gameService.newGame();
+  }
+
+  setReady() {
+    this.gameService.setReady();
+  }
+
 }
