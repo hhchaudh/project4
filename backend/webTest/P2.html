@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  </head>
+<body onload="main()">
+
+<div id="demo"><h2>This Page is to test Player 1.</h2></div>
+
+<button type="button" onclick="sendCommand( 'createUser', createUser       )"   >create user   </button>
+<button type="button" onclick="sendCommand( 'login',      login            )"   >login         </button>
+<button type="button" onclick="sendMessage( 'message', 'Hello there.' )"   >send Hello there</button>
+<button type="button" onclick="sendMessage( 'message', 'Banana slings!!!' )"   >send Banana slings</button>
+<br></br>
+----Lobby----
+<br></br>
+<button type="button" onclick="createGame( 'createGame' )"   >create game    </button>
+<button type="button" onclick="joinGame( 'joinGame', 'jfustos' )"   >join game    </button>
+<button type="button" onclick="logOff( 'logOff' )"   >log off    </button>
+<br></br>
+Users:
+<br></br>
+<div id="userDivOuter"></div>
+<br></br>
+Messages:
+<br></br>
+<div id="messageDivOuter"></div>
+<br></br>
+----Game----
+<br></br>
+<button type="button" onclick="gameLogOff( 'logOff' )"   >log off    </button>
+<button type="button" onclick="setReady( 'setReady' )"   >Ready    </button>
+<button type="button" onclick="newGame( 'newGame' )"   >newGame    </button>
+<br></br>
+Users:
+<br></br>
+<div id="gameUserDivOuter"></div>
+<br></br>
+Messages:
+<br></br>
+<div id="gameMessageDivOuter"></div>
+<br></br>
+
+
+<script>
+
+var mydata;
+var myLobbyData;
+var messageTimerStart;
+var messageTimerStop;
+var times = 0;
+var total = 0;
+var token = 0;
+var gameToken = 0;
+var context;
+var blobs = [];
+var gameFrame = -1;
+var needsRendered = 0;
+var countDown = 0;
+var leftHappy = 0;
+var rightHappy = 0;
+var winner = "None";
+var displayWinner = 0;
+var p1wins = 0;
+var p1losses = 0;
+var p2wins = 0;
+var p2losses = 0;
+var newFrameRequest = 0;
+var leftDown = 0;
+var rightDown = 0;
+var rotateDown = 0;
+var downDown = 0;
+
+function getTimeString()
+{
+	var d = new Date();
+	var ret = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds() + ":" + d.getMilliseconds();
+	return ret;
+}
+
+function error( jsonData )
+{
+	if( ! jsonData.message )
+	{
+		console.log( "Error: an error command needs to have a message!!!" );
+		return;
+	}
+	
+	console.log( "Error from server says: |" + jsonData.message + "|");
+}
+
+function wipeLobby()
+{
+	var divOut = document.getElementById("userDivOuter");
+	while (divOut.firstChild) 
+	{
+		divOut.removeChild(divOut.firstChild);
+	}
+	
+	divOut = document.getElementById("messageDivOuter");
+	while (divOut.firstChild)
+	{
+		divOut.removeChild(divOut.firstChild);
+	}
+	
+	return;
+}
+
+function newFrame( jsonData )
+{
+	if( ! jsonData.frame )
+	{
+		console.log( "Error: no frame gotten!!!" );
+		return;
+	}
+	
+	gameFrame = jsonData.frame - 1;
+	newFrameRequest = 0;
+	blobs = [];
+	
+	updateFrame( jsonData );
+}
+
+function updateFrame( jsonData )
+{
+	if( ! jsonData.frame )
+	{
+		console.log( "Error: no frame gotten!!!" );
+		return;
+	}
+	
+	var frame = jsonData.frame;
+	//console.log( " frame is " + frame + " game frame is " + gameFrame );
+	
+	if( ( frame - 1 ) != gameFrame )
+	{
+		console.log( "Error: out of sync!!!" );
+		getNewGameFrame();
+		return;
+	}
+	
+	gameFrame = frame;
+	
+	if( jsonData.countDown != undefined )
+	{
+		countDown = jsonData.countDown;
+	}
+	
+	if( jsonData.player && jsonData.player.left && ( jsonData.player.left.happy != undefined ) )
+	{
+		leftHappy = jsonData.player.left.happy;
+	}
+	if( jsonData.player && jsonData.player.right && ( jsonData.player.right.happy != undefined ) )
+	{
+		rightHappy = jsonData.player.right.happy;
+	}
+	
+	if( jsonData.winner != undefined )
+	{
+		winner = jsonData.winner;
+	}
+	
+	if( jsonData.displayWinner != undefined )
+	{
+		displayWinner = jsonData.displayWinner
+	}
+	
+	if( jsonData.state != undefined )
+	{
+		if( jsonData.state == "WAITING" )
+		{
+			/// add the button
+		}
+		else
+		{
+			// remove the button
+		}
+	}
+	
+	if( jsonData.blobs )
+	{
+		for( var i = 0; i < jsonData.blobs.length; i++ )
+		{
+			var index = jsonData.blobs[i].id;
+			//if( index == 1 )
+			//{
+				//console.log( "got blob 1 frame = " + jsonData.blobs[i].frame + " color is " + jsonData.blobs[i].color + " side is " + jsonData.blobs[i].side + " ypos " + jsonData.blobs[i].yPos + " xpos " + jsonData.blobs[i].xPos );
+			//}
+			blobs[ index ] = {};
+			blobs[ index ].frame = jsonData.blobs[i].frame;
+			blobs[ index ].color = jsonData.blobs[i].color;
+			blobs[ index ].side  = jsonData.blobs[i].side;
+			blobs[ index ].yPos  = jsonData.blobs[i].yPos;
+			blobs[ index ].xPos  = jsonData.blobs[i].xPos;
+		}
+	}
+	
+	needsRendered = 1;
+}
+
+function renderFrame()
+{
+	context.fillStyle = "grey";
+	context.fillRect( 0, 0, 320, 240 );
+	
+	context.fillStyle = "black";
+	// boarders
+	context.fillRect( 120, 0, 3, 240 );
+	context.fillRect( 197, 0, 3, 240 );
+	
+	// outter boxs next
+	context.fillRect( 126, 95, 28, 50 );
+	context.fillRect( 166, 95, 28, 50 );
+	
+	// outter boxes happy
+	context.fillRect( 120, 40, 65, 35 );
+	
+	context.fillStyle = "grey";
+	// inner boxes for next
+	context.fillRect( 128, 97, 24, 46 );
+	context.fillRect( 168, 97, 24, 46 );
+	
+	// inner boxes for happy
+	context.fillRect( 123, 43, 59, 29 );
+	
+	context.fillStyle = "black";
+	context.font = "20px Georgia";
+	if( countDown > 0 )
+	{
+		var countText = "";
+		if( countDown == 1 ){ countText = "GO"; }
+		else                { countText = " " + ( countDown - 1 );}
+		
+		context.fillText( countText, 145, 200 );
+	}
+	
+	var happyText = "";
+	if(      leftHappy == 0 ){ happyText = "happy";  }
+	else if( leftHappy == 1 ){ happyText = "serious";}
+	else if( leftHappy == 2 ){ happyText = "worried";}
+	else                     { happyText = "crying"; }
+	
+	if( ( displayWinner ) )
+	{
+		if( winner == "left" ){ happyText = "happy";  }
+		else                  { happyText = "crying"; }
+	}
+	
+	context.fillText( happyText, 130, 60 );
+	
+	if(      rightHappy == 0 ){ happyText = "happy";  }
+	else if( rightHappy == 1 ){ happyText = "serious";}
+	else if( rightHappy == 2 ){ happyText = "worried";}
+	else                      { happyText = "crying"; }
+	
+	if( ( displayWinner ) )
+	{
+		if( winner == "right" ){ happyText = "happy";  }
+		else                   { happyText = "crying"; }
+	}
+	
+	context.fillText( happyText, 130, 180 );
+	
+	
+	for ( var i = 0; i < blobs.length; i++ )
+	{
+		var blob = blobs[ i ];
+		if( blob && blob.frame != "vanish" )
+		{
+			var offset = 0;
+			if( blob.side == "right" )
+			{
+				offset = 200;
+			}
+			
+			var xPos = (   blob.xPos          * 20 ) / 1000;
+			var yPos = ( ( blob.yPos - 2000 ) * 20 ) / 1000;
+			var color = blob.color;
+			xPos += offset;
+			
+			if      ( blob.frame == "normal")               { drawBlobNormal( context, xPos, yPos, color );                  }
+			else if ( blob.frame == "smushed")              { drawBlobSmushed( context, xPos, yPos, color );                 }
+			else if ( blob.frame == "vertSmushed")          { drawBlobVertSmushed( context, xPos, yPos, color );             }
+			else if ( blob.frame == "bugEye")               { drawBugEye( context, xPos, yPos, color );                      }
+			else if ( blob.frame == "blow1")                { drawBlow( context, xPos, yPos, color, 1 );                     }
+			else if ( blob.frame == "blow2")                { drawBlow( context, xPos, yPos, color, 2 );                     }
+			else if ( blob.frame == "blow3")                { drawBlow( context, xPos, yPos, color, 3 );                     }
+			else if ( blob.frame == "blow4")                { drawBlow( context, xPos, yPos, color, 4 );                     }
+			else if ( blob.frame == "orb")                  { drawOrb( context, xPos, yPos );                                }
+			else if ( blob.frame == "orbBig")               { drawOrbBig( context, xPos, yPos );                             }
+			else if ( blob.frame == "glow")                 { drawGlow( context, xPos, yPos, color );                               }
+			else if ( blob.frame == "joinRight")            { drawJoin( context, xPos, yPos, color, "joinRight" );           }
+			else if ( blob.frame == "joinRightLeft")        { drawJoin( context, xPos, yPos, color, "joinRightLeft" );       }
+			else if ( blob.frame == "joinRightUp")          { drawJoin( context, xPos, yPos, color, "joinRightUp" );         }
+			else if ( blob.frame == "joinRightDown")        { drawJoin( context, xPos, yPos, color, "joinRightDown" );       }
+			else if ( blob.frame == "joinRightLeftUp")      { drawJoin( context, xPos, yPos, color, "joinRightLeftUp" );     }
+			else if ( blob.frame == "joinRightLeftDown")    { drawJoin( context, xPos, yPos, color, "joinRightLeftDown" );   }
+			else if ( blob.frame == "joinRightUpDown")      { drawJoin( context, xPos, yPos, color, "joinRightUpDown" );     }
+			else if ( blob.frame == "joinRightLeftUpDowm")  { drawJoin( context, xPos, yPos, color, "joinRightLeftUpDowm" ); }
+			else if ( blob.frame == "joinLeft")             { drawJoin( context, xPos, yPos, color, "joinLeft" );            }
+			else if ( blob.frame == "joinLeftUp")           { drawJoin( context, xPos, yPos, color, "joinLeftUp" );          }
+			else if ( blob.frame == "joinLeftDown")         { drawJoin( context, xPos, yPos, color, "joinLeftDown" );        }
+			else if ( blob.frame == "joinLeftUpDown")       { drawJoin( context, xPos, yPos, color, "joinLeftUpDown" );      }
+			else if ( blob.frame == "joinUp")               { drawJoin( context, xPos, yPos, color, "joinUp" );              }
+			else if ( blob.frame == "joinUpDown")           { drawJoin( context, xPos, yPos, color, "joinUpDown" );          }
+			else if ( blob.frame == "joinDown")             { drawJoin( context, xPos, yPos, color, "joinDown" );            }
+			else if ( blob.frame == "que1")
+			{
+				if( blob.side == "left" ) {  drawBlobNormal( context, 130, 120, color );  }
+				else {                       drawBlobNormal( context, 170, 120, color );  }
+			}
+			else if ( blob.frame == "que2")
+			{
+				if( blob.side == "left" ) {  drawBlobNormal( context, 130, 100, color );  }
+				else {                       drawBlobNormal( context, 170, 100, color );  }
+			}
+		}
+	}
+	
+	if( displayWinner )
+	{
+		context.fillStyle = "black";
+		context.font = "20px Georgia";
+		
+		var winText = "Loser!!!";
+		if( winner == "left" ){   winText = "Winner!!!";    }
+		context.fillText( winText, 40, 40 );
+		context.fillText( p1wins + " - " + p1losses, 40, 70 );
+		
+		winText = "Loser!!!";
+		if( winner == "right" ){   winText = "Winner!!!";    }
+		context.fillText( winText, 240, 40 );
+		context.fillText( p2wins + " - " + p2losses, 240, 70 );
+	}
+	
+	needsRendered = 0;
+}
+
+function badUserToken( jsonData )
+{
+	if( token == 0 )
+	{
+		return;
+	}
+	
+	if( ! jsonData.from )
+	{
+		console.log( "Error: a badUserToken command needs to have a from!!!" );
+		return;
+	}
+	
+	if( jsonData.from == "LOBBY" )
+	{
+		token = 0;
+		console.log( "Logging off. Maybe bad token? Probably not though.");
+		wipeLobby();
+	}
+	else
+	{
+		badGameToken( jsonData );
+	}
+}
+
+function badGameToken( jsonData )
+{
+	if( gameToken == 0)
+	{
+		return;
+	}
+	
+	gameToken = 0;
+	
+	console.log( "Logging off Game. Maybe bad token? Probably not though.");
+	
+	var divOut = document.getElementById("gameUserDivOuter");
+	while (divOut.firstChild) 
+	{
+		divOut.removeChild(divOut.firstChild);
+	}
+	
+	divOut = document.getElementById("gameMessageDivOuter");
+	while (divOut.firstChild)
+	{
+		divOut.removeChild(divOut.firstChild);
+	}
+	
+	context.fillStyle = "black";
+	context.fillRect( 0, 0, 320, 240 );
+}
+
+function updateGameToken( jsonData )
+{
+	console.log( "Game Created!!!" );
+	if( ! jsonData.token )
+	{
+		console.log( "Error: we did not get back a game token though!!!" );
+		return;
+	}
+	
+	gameToken = jsonData.token;
+	
+	gameFrame = -1;
+	
+	wipeLobby();
+	
+	startStreams( gameToken );
+}
+
+function updateUserToken( jsonData )
+{
+	console.log( "Logged in Successfully!!!" );
+	if( ! jsonData.token )
+	{
+		console.log( "Error: we did not get back a user token though!!!" );
+		return;
+	}
+	
+	token = jsonData.token;
+	
+	startStreams( "0000000000" );
+}
+
+function newMessage( jsonData, messagedivOut )
+{
+	if( ! jsonData.message )
+	{
+		console.log( "Error: a message command needs to have a message!!!" );
+		return;
+	}
+	
+	if( ! jsonData.userName )
+	{
+		console.log( "Error: a message command needs to have a userName!!!" );
+		return;
+	}
+	
+	var d = new Date();
+	messageTimerStop = d.getTime();
+	
+	var divOut = messagedivOut;
+	var messageDispStr = jsonData.userName + ": " + jsonData.message;
+	var myMessagediv = document.createElement('div');
+	myMessagediv.textContent = messageDispStr;
+	divOut.appendChild(myMessagediv);
+	
+	while( divOut.childNodes.length > 6 )
+	{
+		divOut.removeChild(divOut.firstChild);
+	}
+	
+	console.log( "MESSAGE took |" + ( messageTimerStop - messageTimerStart ) + "| milliseconds |");
+}
+
+function updateLobbyInfo( jsonData, extra )
+{
+	myLobbyData = jsonData;
+	
+	var divOut = document.getElementById("userDivOuter");
+	if( extra )
+	{
+		divOut = document.getElementById("gameUserDivOuter");
+	}
+	
+	while (divOut.firstChild) 
+	{
+		divOut.removeChild(divOut.firstChild);
+	}
+	
+	if( jsonData["users"] )
+	{
+		var arrayLength = jsonData["users"].length;
+		for (var i = 0; i < arrayLength; i++) 
+		{
+			var userDispStr = "";
+			
+			userDispStr += "name: " + jsonData["users"][i]['name'];
+			userDispStr += "   status: " + jsonData["users"][i]['status'];
+			userDispStr += "   totalWins: " + jsonData["users"][i]['totalWins'];
+			userDispStr += "   totalLosses: " + jsonData["users"][i]['totalLosses'];
+			
+			if( extra )
+			{
+				userDispStr += "   wins: " + jsonData["users"][i]['wins'];
+				userDispStr += "   losses: " + jsonData["users"][i]['losses'];
+				if( jsonData["users"][i]['ready'] != undefined )
+				{
+					if( jsonData["users"][i]['ready'] ){  userDispStr += "   READY ";  }
+					else                               {  userDispStr += "   NOT READY ";  }
+				}
+				
+				if( i == 0 )
+				{
+					p1wins = jsonData["users"][i]['wins'];
+					p1losses = jsonData["users"][i]['losses'];
+				}
+				else if ( i == 1 )
+				{
+					p2wins = jsonData["users"][i]['wins'];
+					p2losses = jsonData["users"][i]['losses'];
+				}
+			}
+			
+			var myUserdiv = document.createElement('div');
+			myUserdiv.textContent = userDispStr;
+			
+			divOut.appendChild(myUserdiv);
+		}
+	}
+	else
+	{
+		console.log( "Error: no users field in the updateLobbyInfo packet!!!" );
+	}
+}
+
+function stream_process( streamName, data )
+{
+	var jsonData;
+	var messagedivOut;
+	
+	if( ( streamName == "stream1" ) || ( streamName == "stream2" ) )
+	{
+		messagedivOut = document.getElementById("messageDivOuter");
+	}
+	else
+	{
+		messagedivOut = document.getElementById("gameMessageDivOuter");
+	}
+	
+	try
+	{
+		jsonData = JSON.parse( data );
+	}
+	catch( err )
+	{
+		console.log( streamName + " : Could not convert data to JSON : |" + data + "| : " + getTimeString() );
+		return;
+	}
+		
+	//console.log( streamName + " : |" + data + "| : " + getTimeString() );
+	
+	if( ! jsonData.name )
+	{
+		console.log( "Error: command needs to have a name!!!" );
+		return;
+	}
+	
+	if( jsonData.name == "ERROR"      )       {   error( jsonData );                     return;  }
+	if( jsonData.name == "updatePlayerInfo" ) {   updateLobbyInfo( jsonData, 1 );        return;  }
+	if( jsonData.name == "updateLobbyInfo" )  {   updateLobbyInfo( jsonData, 0 );        return;  }
+	if( jsonData.name == "userToken" )        {   updateUserToken( jsonData );           return;  }
+	if( jsonData.name == "badUserToken" )     {   badUserToken( jsonData );              return;  }
+	if( jsonData.name == "badGameToken" )     {   badGameToken( jsonData );              return;  }
+	if( jsonData.name == "gameToken" )        {   updateGameToken( jsonData );           return;  }
+	if( jsonData.name == "newMessage" )       {   newMessage( jsonData, messagedivOut ); return;  }
+	if( jsonData.name == "newFrame" )         {   newFrame( jsonData );                  return;  }
+	if( jsonData.name == "updateFrame" )      {   updateFrame( jsonData );               return;  }
+}
+
+function stream_progress() 
+{
+	var last_index = this.j_last_index;
+	
+	var curr_index = this.responseText.length;
+    if ( last_index >= curr_index ) return;
+    
+	var gameDataFormat = /<==(.*?)==>/;
+    var curr_response = this.responseText.substring(last_index, curr_index);
+	var match;
+		
+	while( match = gameDataFormat.exec( curr_response ) )
+	{
+		// This is a valid data member comming back from the server, do stuff with it.
+		stream_process( this.j_stream_name, match[1] );
+		
+		// The browser might have combined more than  1 response, so don't miss it, try for more.
+		
+		var step = match.index + match[0].length;
+		curr_response = curr_response.substring( step );
+		this.j_last_index += step;
+	}
+	if( needsRendered )
+	{
+		renderFrame();
+	}
+}
+
+function stream_onreadystatechange()
+{
+	if (this.readyState == 4 && this.status == 200) 
+	{
+		var d = new Date();
+		console.log( "Connection died OK though!!!" + " : " + getTimeString() );
+		times++;
+		totalTime = d.getTime() - this.packetStart;
+		total += totalTime;
+		var average = total / times;
+		console.log( "took: " + totalTime + " average: " + average );
+		
+		if( this.j_stream_name == "stream1" || this.j_stream_name == "stream2" 
+			|| this.j_stream_name == "stream3" || this.j_stream_name == "stream4")
+		{
+			if( gameToken == 0 && ( this.j_stream_name == "stream3" || this.j_stream_name == "stream4" ) )
+			{
+				return;
+			}
+			if( token == 0 )
+			{
+				return;
+			}
+			sendCommand( this.j_stream_name, this.j_stream_data );
+		}
+	}
+	else if ( this.readyState == 4 && this.status == 503 )
+	{
+		console.log( "Problem with game " + " : " + this.responseText + " : " + getTimeString() );
+	}
+}
+
+function sendCommand( stream_name, postData )
+{
+	var d = new Date();
+	var xhttp = new XMLHttpRequest();
+	xhttp.open("POST", "https://people.eecs.ku.edu/~jfustos/cgi-bin/altStackAPI.cgi", true);
+	xhttp.j_last_index = 0;
+	xhttp.j_stream_name = stream_name;
+	xhttp.j_stream_data = postData;
+	xhttp.packetStart = d.getTime();
+	xhttp.onprogress = stream_progress;
+	xhttp.onreadystatechange = stream_onreadystatechange;
+	xhttp.setRequestHeader("Content-type", "application/json");
+	xhttp.send( postData);
+}
+
+var getStreamData = "{}";
+var startGame        = JSON.stringify({"name":"startGame",    "player":"P1" });
+var createUser       = JSON.stringify({"name":"createUser",   "where":"0000000000",  "userName":"MachoMan", "password":"12345" });
+var login            = JSON.stringify({"name":"login",        "where":"0000000000",  "userName":"MachoMan", "password":"12345" });
+
+function sendMove( row, col )
+{
+	var sendMoveData = JSON.stringify({"name":"move",  "player":"P1",  "row":row,  "col":col  });
+	sendCommand( "moveStream", sendMoveData );
+}
+
+function logOff( stream_name )
+{
+	if( ( token == 0 ) )
+	{
+		return;
+	}
+	
+	logOffData = JSON.stringify({"name":"logOff", "where":"0000000000", "userToken":token });
+	sendCommand( stream_name, logOffData );
+}
+
+function gameLogOff( stream_name )
+{
+	if( ( token == 0 ) || gameToken == 0 )
+	{
+		return;
+	}
+	
+	logOffData = JSON.stringify({"name":"logOff", "where":gameToken, "userToken":token });
+	sendCommand( stream_name, logOffData );
+}
+
+function sendMessage( stream_name, messageText )
+{
+	if( token == 0 )
+	{
+		return;
+	}
+	
+	var where = "0000000000";
+	if( gameToken != 0 )
+	{
+		where = gameToken;
+	}
+	
+	var d = new Date();
+	messageTimerStart = d.getTime();
+	var sendMessageData = JSON.stringify({"name":"sendMessage",  "where":where, "userToken":token,  "message":messageText });
+	sendCommand( stream_name, sendMessageData );
+}
+
+function getNewGameFrame()
+{
+	if( gameToken == 0 )
+	{
+		console.log( "Requested a new game frame but there is no game!!!" );
+		return;
+	}
+	
+	if( newFrameRequest != 0 )
+	{
+		return;
+	}
+	
+	var sendGetNewGameFrameDatat = JSON.stringify({"name":"getNewGameFrame",  "where":gameToken, "userToken":token });
+	sendCommand( "newGameFrame", sendGetNewGameFrameDatat );
+	newFrameRequest = 1;
+}
+
+function startStreams( where )
+{
+	getStreamData = JSON.stringify({"name":"getGameStream", "where":where, "userToken":token });
+	if( where == "0000000000")
+	{
+		sendCommand( "stream1", getStreamData );
+		sendCommand( "stream2", getStreamData );
+	}
+	else
+	{
+		sendCommand( "stream3", getStreamData );
+		sendCommand( "stream4", getStreamData );
+	}
+}
+
+function createGame( stream_name )
+{
+	if( token == 0 )
+	{
+		return 0;
+	}
+	
+	createGameData = JSON.stringify({"name":"createGame", "where":"0000000000", "userToken":token });
+	sendCommand( stream_name, createGameData );
+}
+
+function setReady( stream_name )
+{
+	if( gameToken == 0 )
+	{
+		return;
+	}
+	
+	setReadyData = JSON.stringify({"name":"setReady", "where":gameToken, "userToken":token });
+	sendCommand( stream_name, setReadyData );
+}
+
+
+function newGame( stream_name )
+{
+	if( gameToken == 0 )
+	{
+		return;
+	}
+	
+	newGameData = JSON.stringify({"name":"newGame", "where":gameToken, "userToken":token });
+	sendCommand( stream_name, newGameData );
+}
+
+function joinGame( stream_name, userName )
+{
+	if( token == 0 )
+	{
+		return 0;
+	}
+	
+	joinGameData = JSON.stringify({"name":"joinGame", "where":"0000000000", "userToken":token, "userName":userName });
+	sendCommand( stream_name, joinGameData );
+}
+
+function main()
+{
+	var canvas = document.getElementById("myCanvas");
+	context = canvas.getContext("2d");
+	
+	context.fillStyle = "black";
+	context.fillRect( 0, 0, 320, 240 );
+	
+	document.addEventListener('keydown', function( e ) {
+		if( e.keyCode == 'A'.charCodeAt(0) && leftDown == 0 )
+		{
+			leftDown = 1;
+			keyDownData = JSON.stringify({"name":"keyDown", "where":gameToken, "userToken":token, "key":"left" });
+			sendCommand( "keyDown", keyDownData );
+		}
+		else if( e.keyCode == 'D'.charCodeAt(0) && rightDown == 0 )
+		{
+			rightDown = 1;
+			keyDownData = JSON.stringify({"name":"keyDown", "where":gameToken, "userToken":token, "key":"right" });
+			sendCommand( "keyDown", keyDownData );
+		}
+		else if( e.keyCode == 'S'.charCodeAt(0) && downDown == 0 )
+		{
+			downDown = 1;
+			keyDownData = JSON.stringify({"name":"keyDown", "where":gameToken, "userToken":token, "key":"down" });
+			sendCommand( "keyDown", keyDownData );
+		}
+		else if( e.keyCode == 'P'.charCodeAt(0) && rotateDown == 0 )
+		{
+			rotateDown = 1;
+			keyDownData = JSON.stringify({"name":"keyDown", "where":gameToken, "userToken":token, "key":"rotate" });
+			sendCommand( "keyDown", keyDownData );
+		}
+	}, false);
+	
+	document.addEventListener('keyup', function( e ) {
+		if( e.keyCode == 'A'.charCodeAt(0) )
+		{
+			leftDown = 0;
+			keyUpData = JSON.stringify({"name":"keyUp", "where":gameToken, "userToken":token, "key":"left" });
+			sendCommand( "keyUp", keyUpData );
+		}
+		else if( e.keyCode == 'D'.charCodeAt(0) )
+		{
+			rightDown = 0;
+			keyUpData = JSON.stringify({"name":"keyUp", "where":gameToken, "userToken":token, "key":"right" });
+			sendCommand( "keyUp", keyUpData );
+		}
+		else if( e.keyCode == 'S'.charCodeAt(0) )
+		{
+			downDown = 0;
+			keyUpData = JSON.stringify({"name":"keyUp", "where":gameToken, "userToken":token, "key":"down" });
+			sendCommand( "keyUp", keyUpData );
+		}
+		else if( e.keyCode == 'P'.charCodeAt(0) )
+		{
+			rotateDown = 0;
+			keyUpData = JSON.stringify({"name":"keyUp", "where":gameToken, "userToken":token, "key":"rotate" });
+			sendCommand( "keyUp", keyUpData );
+		}
+	}, false);
+}
+
+function drawOrb( myContext, xPos, yPos )
+{
+	myContext.fillStyle = "white";
+	myContext.fillRect( xPos + 4, yPos + 4, 12, 12 );
+}
+
+function drawGlow( myContext, xPos, yPos, color )
+{
+	myContext.fillStyle = "white";
+	myContext.fillRect( xPos + 2, yPos + 2, 16, 16 );
+	myContext.fillStyle = color;
+	myContext.fillRect( xPos + 4, yPos + 4, 12, 12 );
+}
+
+function drawOrbBig( myContext, xPos, yPos )
+{
+	myContext.fillStyle = "white";
+	myContext.fillRect( xPos, yPos, 20, 20 );
+}
+
+function drawBugEye( myContext, xPos, yPos, color )
+{
+	myContext.fillStyle = color;
+	myContext.fillRect( xPos, yPos, 20, 20 );
+	myContext.fillStyle = "white";
+	myContext.fillRect( xPos + 1, yPos + 2, 8, 10 );
+	myContext.fillRect( xPos + 11, yPos + 2, 8, 10 );
+	myContext.fillStyle = "black";
+	myContext.fillRect( xPos + 3, yPos + 6, 4, 4 );
+	myContext.fillRect( xPos + 13, yPos + 6, 4, 4 );
+}
+
+function drawBlow( myContext, xPos, yPos, color, frame )
+{
+	myContext.fillStyle = color;
+	if( frame == 1 )
+	{
+		myContext.fillRect( xPos + 5, yPos + 5, 10, 10 );
+	}
+	else if( frame == 2)
+	{
+		myContext.fillRect( xPos, yPos, 8, 8 );
+		myContext.fillRect( xPos + 12, yPos, 8, 8 );
+		myContext.fillRect( xPos, yPos + 12, 8, 8 );
+		myContext.fillRect( xPos + 12, yPos + 12, 8, 8 );
+	}
+	else if( frame == 3)
+	{
+		myContext.fillRect( xPos - 3, yPos - 3, 5, 5 );
+        myContext.fillRect( xPos + 19, yPos - 3, 5, 5 );
+        myContext.fillRect( xPos - 3, yPos + 19, 5, 5 );
+        myContext.fillRect( xPos + 19, yPos + 19, 5, 5 );
+	}
+	else if( frame == 4)
+	{
+		myContext.fillRect( xPos - 6, yPos - 6, 3, 3 );
+        myContext.fillRect( xPos + 23, yPos - 6, 3, 3 );
+        myContext.fillRect( xPos - 6, yPos + 23, 3, 3 );
+        myContext.fillRect( xPos + 23, yPos + 23, 3, 3 );
+	}
+}
+
+function drawBlobNormal( myContext, xPos, yPos, color )
+{
+	myContext.fillStyle = color; 
+	myContext.fillRect( xPos + 2, yPos + 2, 16, 16 );
+}
+
+function drawBlobSmushed( myContext, xPos, yPos, color )
+{
+	myContext.fillStyle = color;
+	myContext.fillRect( xPos, yPos + 8, 20, 12 );
+}
+
+function drawBlobVertSmushed( myContext, xPos, yPos, color )
+{
+	myContext.fillStyle = color;
+	myContext.fillRect( xPos + 4, yPos, 12, 20 );
+}
+
+function drawJoin( myContext, xPos, yPos, color, name )
+{
+	myContext.fillStyle = color;
+	drawBlobNormal( myContext, xPos, yPos, color );
+	
+	if( name == "joinRight" )
+	{
+		myContext.fillRect( xPos + 18, yPos + 7, 2, 6 );
+	}
+	else if( name == "joinRightLeft" )
+	{
+		myContext.fillRect( xPos, yPos + 7, 2, 6 );
+		myContext.fillRect( xPos + 18, yPos + 7, 2, 6 );
+	}
+	else if( name == "joinRightUp" )
+	{
+		myContext.fillRect( xPos + 18, yPos + 7, 2, 6 );
+		myContext.fillRect( xPos + 7, yPos, 6, 2 );
+	}
+	else if( name == "joinRightDown" )
+	{
+		myContext.fillRect( xPos + 18, yPos + 7, 2, 6 );
+		myContext.fillRect( xPos + 7, yPos + 18, 6, 2 );
+	}
+	else if( name == "joinRightLeftUp" )
+	{
+		myContext.fillRect( xPos, yPos + 7, 2, 6 );
+		myContext.fillRect( xPos + 18, yPos + 7, 2, 6 );
+		myContext.fillRect( xPos + 7, yPos, 6, 2 );
+	}
+	else if( name == "joinRightLeftDown" )
+	{
+		myContext.fillRect( xPos, yPos + 7, 2, 6 );
+		myContext.fillRect( xPos + 18, yPos + 7, 2, 6 );
+		myContext.fillRect( xPos + 7, yPos + 18, 6, 2 );
+	}
+	else if( name == "joinRightUpDown" )
+	{
+		myContext.fillRect( xPos + 18, yPos + 7, 2, 6 );
+		myContext.fillRect( xPos + 7, yPos, 6, 2 );
+		myContext.fillRect( xPos + 7, yPos + 18, 6, 2 );
+	}
+	else if( name == "joinRightLeftUpDown" )
+	{
+		myContext.fillRect( xPos, yPos + 7, 2, 6 );
+		myContext.fillRect( xPos + 18, yPos + 7, 2, 6 );
+		myContext.fillRect( xPos + 7, yPos, 6, 2 );
+		myContext.fillRect( xPos + 7, yPos + 18, 6, 2 );
+	}
+	else if( name == "joinLeft" )
+	{
+		myContext.fillRect( xPos, yPos + 7, 2, 6 );
+	}
+	else if( name == "joinLeftUp" )
+	{
+		myContext.fillRect( xPos, yPos + 7, 2, 6 );
+		myContext.fillRect( xPos + 7, yPos, 6, 2 );
+	}
+	else if( name == "joinLeftDown" )
+	{
+		myContext.fillRect( xPos, yPos + 7, 2, 6 );
+		myContext.fillRect( xPos + 7, yPos + 18, 6, 2 );
+	}
+	else if( name == "joinLeftUpDown" )
+	{
+		myContext.fillRect( xPos, yPos + 7, 2, 6 );
+		myContext.fillRect( xPos + 7, yPos, 6, 2 );
+		myContext.fillRect( xPos + 7, yPos + 18, 6, 2 );
+	}
+	else if( name == "joinUp")
+	{
+		myContext.fillRect( xPos + 7, yPos, 6, 2 );
+	}
+	else if( name == "joinUpDown")
+	{
+		myContext.fillRect( xPos + 7, yPos, 6, 2 );
+		myContext.fillRect( xPos + 7, yPos + 18, 6, 2 );
+	}
+	else if( name == "joinDown")
+	{
+		myContext.fillRect( xPos + 7, yPos + 18, 6, 2 );
+	}
+}
+
+</script>
+
+   <canvas id="myCanvas" width="320" height="240"></canvas>
+
+</body>
+</html>

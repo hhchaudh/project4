@@ -96,6 +96,15 @@ sub getUserFromToken
 			name     => 'badUserToken',	
 		);
 		
+		if( $command->{'where'} == 0 )
+		{
+			$badUserToken{'from'} = 'LOBBY';
+		}
+		else
+		{
+			$badUserToken{'from'} = 'GAME';
+		}
+		
 		$stream->{'sendCommand'}->( $stream, \%badUserToken );
 		$stream->{'close'}->( $stream );
 		return;

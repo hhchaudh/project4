@@ -114,6 +114,8 @@ sub timeOutUser
 	delete $game->{'tokens'}->{ $token };
 	delete $game->{'activeUsers'}->{ $userName };
 	
+	$game->{'extraUpdate'} = 1;
+	
 	return;
 }
 

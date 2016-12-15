@@ -13,7 +13,7 @@ use lib "/home/jfustos/perl5/lib/perl5";
 
 use JSON;
 
-use lib "/home/jfustos/EECS448/puyoPuyo";
+use lib "/home/jfustos/EECS448/altStack";
 
 require "modules/Conf.pm";
 require "modules/Report.pm";
@@ -21,6 +21,7 @@ require "modules/Command.pm";
 require "modules/GameUtil.pm";
 require "modules/Stream.pm";
 require "modules/UserInfo.pm";
+require "modules/Game.pm";
 
 require "modules/Command/GetGameStream.pm";
 require "modules/Command/SendMessage.pm";
@@ -34,6 +35,10 @@ require "modules/Command/CloseGame.pm";
 require "modules/Command/AcceptUser.pm";
 require "modules/Command/LogOff.pm";
 require "modules/Command/JoinGame.pm";
+require "modules/Command/GetNewGameFrame.pm";
+require "modules/Command/SetReady.pm";
+require "modules/Command/NewGame.pm";
+require "modules/Command/Key.pm";
 
 $SIG{CHLD} = "IGNORE";
 
@@ -60,6 +65,8 @@ $server->autoflush( 1 );
 my $game = {
 	state        => "Lobby",
 	updateStatus => "LOBBY",
+	innerGame    => undef,
+	extraUpdate  => 0,
 	users        => UserInfo::get( $reporter ),
 	activeUsers  => {},
 	players      => [],
@@ -88,10 +95,15 @@ my $game = {
 		logOff        => \&Command::LogOff::logOff,
 		joinGame      => \&Command::JoinGame::joinGame,
 	},
-	gameClientCommands => {
-		getGameStream => \&Command::GetGameStream::getGameStream,
-		sendMessage   => \&Command::SendMessage::sendMessage,
-		logOff        => \&Command::LogOff::logOff,
+	gameClientCommands  => {
+		getGameStream   => \&Command::GetGameStream::getGameStream,
+		sendMessage     => \&Command::SendMessage::sendMessage,
+		logOff          => \&Command::LogOff::logOff,
+		getNewGameFrame => \&Command::GetNewGameFrame::getNewGameFrame,
+		setReady        => \&Command::SetReady::setReady,
+		newGame         => \&Command::NewGame::newGame,
+		keyDown         => \&Command::Key::keyDown,
+		keyUp           => \&Command::Key::keyUp,
 	},
 	gameCommands => {
 		removeUser      => \&Command::RemoveUserLobbySide::removeUser,
@@ -154,22 +166,25 @@ while( 1 )
 	### process all commands
 	while( my $stream = shift @{ $game->{'inStreams'} } )
 	{
-		if( my $commandString = $stream->{'getCommand'}->( $stream ) )
-		{
-			Command::runCommand( $commandString, $stream );
-		}
+		$stream->{'getCommand'}->( $stream );
 	}
 	
 	
 	### update the lobby
-	if( $frame % 20 == 0 )
+	if(  ( $game->{'extraUpdate'} == 1 )  ||  ( $frame % 20 == 0 )  )
 	{
+		$game->{'extraUpdate'} = 0;
 		my $which = ( $game->{'state'} eq "Lobby" ) ? "Lobby" : "Player";
 		updateInfo( $which );
 	}
 	
 	### run internal periodic logic
-	#gamePeriodic();
+	my $innerGame = $game->{'innerGame'};
+	if( defined $innerGame )
+	{
+		$innerGame->{'runFrame'}->( $innerGame );
+		updateGameInfo();
+	}
 	
 	
 	### update all player streams
@@ -190,6 +205,50 @@ while( 1 )
 properDie( "Exiting OK." );
 
 exit 0;
+
+sub updateGameInfo
+{
+	my $players = $game->{'players'};
+	my $innerGame = $game->{'innerGame'};
+	
+	my $updateFrame = $innerGame->{'getUpdateFrame'}->( $innerGame );
+	my $updateFrameNum = $updateFrame->{'frame'};
+	my $newFrame;
+	
+	foreach my $player ( @{ $players } )
+	{
+		my $userName  = $player->{'user'};
+		my $lastFrame = $player->{'lastFrame'};
+		
+		if( defined $game->{'activeUsers'}->{ $userName } )
+		{
+			my $user = $game->{'activeUsers'}->{ $userName };
+			
+			if( @{ $user->{'streams'} } )
+			{
+				my $stream = $user->{'streams'}->[ 0 ];
+				
+				if( ( $updateFrameNum == ( $lastFrame + 1 ) ) && ( !$user->{'requestNewFrame'} ) )
+				{
+					$stream->{'sendCommand'}->( $stream, $updateFrame );
+				}
+				elsif( ( $updateFrameNum == $lastFrame ) && ( !$user->{'requestNewFrame'} ) )
+				{
+					
+				}
+				else
+				{
+					$newFrame = $innerGame->{'getNewFrame'}->( $innerGame ) unless defined $newFrame;
+					
+					$stream->{'sendCommand'}->( $stream, $newFrame );
+					$user->{'requestNewFrame'} = 0;
+				}
+				
+				$player->{'lastFrame'} = $updateFrameNum;
+			}
+		}
+	}
+}
 
 sub properDie
 {
@@ -305,6 +364,7 @@ sub getExtraInfo
 	
 	$userInfo->{'wins'} = $player->{'wins'};
 	$userInfo->{'losses'} = $player->{'losses'};
+	$userInfo->{'ready'} = $player->{'ready'};
 }
 
 sub byStatusName
@@ -334,6 +394,12 @@ sub updatePlayerStreams
 	{
 		my $user = $users->{$userName};
 		
+		unless( ( defined $user ) && ( defined $user->{'streams'} ) )
+		{
+			$reporter->{'log'}->( "|$userName| is not there anymore must have gotten timed out SPECIAL ERROR." );
+			next;
+		}
+		
 		if( @{ $user->{'streams'} } > 0 )
 		{
 			$user->{'timeOut'} = 0;
@@ -358,18 +424,3 @@ sub updatePlayerStreams
 		}
 	}
 }
-
-=cut
-
-sub gamePeriodic
-{
-	if( $gameState eq "Waiting" )
-	{
-		if( $frame % 20 == 0 )
-		{
-			updateGameInfo();
-		}
-	}
-}
-
-=cut

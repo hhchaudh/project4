@@ -17,13 +17,6 @@ sub getGameStream
 	
 	$reporter->{'log'}->( "Setting up game stream for |$userName|" );
 	
-	### we want bad things to happen if this stream tries to read something.
-	$stream->{'validCommands'} = undef;
-	$stream->{'getCommand'}    = undef;
-	$stream->{'readError'}     = undef;
-	$stream->{'readPartial'}   = undef;
-	$stream->{'readComplete'}  = undef;
-	
 	### convert the stream to a gameStream.
 	$stream->{'timeOut'}       = 1;
 	$stream->{'expire'}        = 100;
@@ -32,6 +25,7 @@ sub getGameStream
 	$stream->{'userName'}      = $userName;
 	
 	push @{ $game->{'activeUsers'}->{$userName}->{'streams'} }, $stream;
+	$game->{'extraUpdate'} = 1;
 	
 	return;
 }
