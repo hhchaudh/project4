@@ -7,14 +7,18 @@ import {Subject, Observable} from "rxjs";
 @Injectable()
 export class GameService {
 
-  GAME_WINDOW_WIDTH:number = 300;
-  GAME_WINDOW_HEIGHT:number = 600;
-  BLOB_WIDTH:number = this.GAME_WINDOW_WIDTH/6;
-  BLOB_HEIGHT:number = this.GAME_WINDOW_HEIGHT/12;
-  OFFSET:number = 0;
+  GAME_WINDOW_WIDTH: number = 300;
+  GAME_WINDOW_HEIGHT: number = 600;
+  BLOB_WIDTH: number = this.GAME_WINDOW_WIDTH / 6;
+  BLOB_HEIGHT: number = this.GAME_WINDOW_HEIGHT / 12;
+  FACE_WIDTH: number = 100;
+  FACE_HEIGHT: number = 100;
+  QUE_WIDTH: number = 100;
+  QUE_HEIGHT: number = 100;
+  OFFSET: number = 0;
 
-  userName:string = "";
-  currentStatus:string = "";
+  userName: string = "";
+  currentStatus: string = "";
   currentStatusSubject: Subject<string> = new Subject<string>();
   keepStreamsGoing = true;
   times = 0;
@@ -44,11 +48,30 @@ export class GameService {
 
   canvasLeft: HTMLCanvasElement;
   canvasRight: HTMLCanvasElement;
+  greenFaceCanvas: HTMLCanvasElement;
+  redFaceCanvas: HTMLCanvasElement;
+  leftQueCanvas: HTMLCanvasElement;
+  rightQueCanvas: HTMLCanvasElement;
+
   contextLeft: CanvasRenderingContext2D;
   contextRight: CanvasRenderingContext2D;
+  greenFaceContext: CanvasRenderingContext2D;
+  redFaceContext: CanvasRenderingContext2D;
+  leftQueContext: CanvasRenderingContext2D;
+  rightQueContext: CanvasRenderingContext2D;
 
-  orb:HTMLImageElement = new Image();
-  orbBig:HTMLImageElement = new Image();
+  orb: HTMLImageElement = new Image();
+  orbBig: HTMLImageElement = new Image();
+
+  greenFaceCrying: HTMLImageElement = new Image();
+  greenFaceHappy: HTMLImageElement = new Image();
+  greenFaceSerious: HTMLImageElement = new Image();
+  greenFaceWorried: HTMLImageElement = new Image();
+
+  redFaceCrying: HTMLImageElement = new Image();
+  redFaceHappy: HTMLImageElement = new Image();
+  redFaceSerious: HTMLImageElement = new Image();
+  redFaceWorried: HTMLImageElement = new Image();
 
   blackNormalBlob: HTMLImageElement = new Image();
   blackBlow1Blob: HTMLImageElement = new Image();
@@ -80,6 +103,7 @@ export class GameService {
   blueJoinUpDownBlob: HTMLImageElement = new Image();
   blueSmushBlob: HTMLImageElement = new Image();
   blueVertSmushBlob: HTMLImageElement = new Image();
+  blueGlowBlob: HTMLImageElement = new Image();
 
   greenNormalBlob: HTMLImageElement = new Image();
   greenBlow1Blob: HTMLImageElement = new Image();
@@ -104,6 +128,7 @@ export class GameService {
   greenJoinUpDownBlob: HTMLImageElement = new Image();
   greenSmushBlob: HTMLImageElement = new Image();
   greenVertSmushBlob: HTMLImageElement = new Image();
+  greenGlowBlob: HTMLImageElement = new Image();
 
   purpleNormalBlob: HTMLImageElement = new Image();
   purpleBlow1Blob: HTMLImageElement = new Image();
@@ -128,6 +153,7 @@ export class GameService {
   purpleJoinUpDownBlob: HTMLImageElement = new Image();
   purpleSmushBlob: HTMLImageElement = new Image();
   purpleVertSmushBlob: HTMLImageElement = new Image();
+  purpleGlowBlob: HTMLImageElement = new Image();
 
   redNormalBlob: HTMLImageElement = new Image();
   redBlow1Blob: HTMLImageElement = new Image();
@@ -152,6 +178,7 @@ export class GameService {
   redJoinUpDownBlob: HTMLImageElement = new Image();
   redSmushBlob: HTMLImageElement = new Image();
   redVertSmushBlob: HTMLImageElement = new Image();
+  redGlowBlob: HTMLImageElement = new Image();
 
   yellowNormalBlob: HTMLImageElement = new Image();
   yellowBlow1Blob: HTMLImageElement = new Image();
@@ -176,13 +203,24 @@ export class GameService {
   yellowJoinUpDownBlob: HTMLImageElement = new Image();
   yellowSmushBlob: HTMLImageElement = new Image();
   yellowVertSmushBlob: HTMLImageElement = new Image();
+  yellowGlowBlob: HTMLImageElement = new Image();
 
   constructor() {
-    this.BLOB_WIDTH = this.GAME_WINDOW_WIDTH/6;
-    this.BLOB_WIDTH = this.GAME_WINDOW_HEIGHT/12;
+    this.BLOB_WIDTH = this.GAME_WINDOW_WIDTH / 6;
+    this.BLOB_WIDTH = this.GAME_WINDOW_HEIGHT / 12;
 
     this.orb.src = "./assets/game-img/orb.png";
     this.orbBig.src = "./assets/game-img/orbBig.png";
+
+    this.greenFaceCrying.src = "./assets/game-img/face1-crying.png";
+    this.greenFaceHappy.src = "./assets/game-img/face1-happy.png";
+    this.greenFaceSerious.src = "./assets/game-img/face1-serious.png";
+    this.greenFaceWorried.src = "./assets/game-img/face1-worried.png";
+
+    this.redFaceCrying.src = "./assets/game-img/face2-crying.png";
+    this.redFaceHappy.src = "./assets/game-img/face2-happy.png";
+    this.redFaceSerious.src = "./assets/game-img/face2-serious.png";
+    this.redFaceWorried.src = "./assets/game-img/face2-worried.png";
 
     this.blackNormalBlob.src = "./assets/game-img/blob-boulder.png";
     this.blackBlow1Blob.src = "./assets/game-img/blow1-black.png";
@@ -214,6 +252,7 @@ export class GameService {
     this.blueJoinUpDownBlob.src = "./assets/game-img/joinUpDown-blue.png";
     this.blueSmushBlob.src = "./assets/game-img/smush-blue.png";
     this.blueVertSmushBlob.src = "./assets/game-img/vertSmush-blue.png";
+    this.blueGlowBlob.src = "./assets/game-img/glow-blue.png";
 
     this.greenNormalBlob.src = "./assets/game-img/blob-green.png";
     this.greenBlow1Blob.src = "./assets/game-img/blow1-green.png";
@@ -238,6 +277,7 @@ export class GameService {
     this.greenJoinUpDownBlob.src = "./assets/game-img/joinUpDown-green.png";
     this.greenSmushBlob.src = "./assets/game-img/smush-green.png";
     this.greenVertSmushBlob.src = "./assets/game-img/vertSmush-green.png";
+    this.greenGlowBlob.src = "./assets/game-img/glow-green.png";
 
     this.purpleNormalBlob.src = "./assets/game-img/blob-purple.png";
     this.purpleBlow1Blob.src = "./assets/game-img/blow1-purple.png";
@@ -262,6 +302,7 @@ export class GameService {
     this.purpleJoinUpDownBlob.src = "./assets/game-img/joinUpDown-purple.png";
     this.purpleSmushBlob.src = "./assets/game-img/smush-purple.png";
     this.purpleVertSmushBlob.src = "./assets/game-img/vertSmush-purple.png";
+    this.purpleGlowBlob.src = "./assets/game-img/glow-purple.png";
 
     this.redNormalBlob.src = "./assets/game-img/blob-red.png";
     this.redBlow1Blob.src = "./assets/game-img/blow1-red.png";
@@ -286,6 +327,7 @@ export class GameService {
     this.redJoinUpDownBlob.src = "./assets/game-img/joinUpDown-red.png";
     this.redSmushBlob.src = "./assets/game-img/smush-red.png";
     this.redVertSmushBlob.src = "./assets/game-img/vertSmush-red.png";
+    this.redGlowBlob.src = "./assets/game-img/glow-red.png";
 
     this.yellowNormalBlob.src = "./assets/game-img/blob-yellow.png";
     this.yellowBlow1Blob.src = "./assets/game-img/blow1-yellow.png";
@@ -310,9 +352,10 @@ export class GameService {
     this.yellowJoinUpDownBlob.src = "./assets/game-img/joinUpDown-yellow.png";
     this.yellowSmushBlob.src = "./assets/game-img/smush-yellow.png";
     this.yellowVertSmushBlob.src = "./assets/game-img/vertSmush-yellow.png";
+    this.yellowGlowBlob.src = "./assets/game-img/glow-yellow.png";
   }
 
-  setUserName(name:string) {
+  setUserName(name: string) {
     this.userName = name;
   }
 
@@ -325,18 +368,37 @@ export class GameService {
     return this.currentStatusSubject.asObservable();
   }
 
-  setCanvas(gameCanvasLeft: HTMLCanvasElement, gameCanvasRight: HTMLCanvasElement) {
+  setCanvas(gameCanvasLeft: HTMLCanvasElement,
+            gameCanvasRight: HTMLCanvasElement,
+            canvasGreenFace: HTMLCanvasElement,
+            canvasRedFace: HTMLCanvasElement,
+            canvasLeftQueue: HTMLCanvasElement,
+            canvasRightQueue: HTMLCanvasElement) {
     this.canvasLeft = gameCanvasLeft;
     this.contextLeft = this.canvasLeft.getContext("2d");
-
     this.contextLeft.fillStyle = "black";
     this.contextLeft.fillRect(0, 0, this.GAME_WINDOW_WIDTH, this.GAME_WINDOW_HEIGHT);
 
     this.canvasRight = gameCanvasRight;
     this.contextRight = this.canvasRight.getContext("2d");
-
     this.contextRight.fillStyle = "black";
     this.contextRight.fillRect(0, 0, this.GAME_WINDOW_WIDTH, this.GAME_WINDOW_HEIGHT);
+
+    this.greenFaceCanvas = canvasGreenFace;
+    this.greenFaceContext = this.greenFaceCanvas.getContext("2d");
+
+    this.redFaceCanvas = canvasRedFace;
+    this.redFaceContext = this.redFaceCanvas.getContext("2d");
+
+    this.leftQueCanvas = canvasLeftQueue;
+    this.leftQueContext = this.leftQueCanvas.getContext("2d");
+    this.leftQueContext.fillStyle = "grey";
+    this.leftQueContext.fillRect(0, 0, this.QUE_WIDTH, this.QUE_HEIGHT);
+
+    this.rightQueCanvas = canvasRightQueue;
+    this.rightQueContext = this.rightQueCanvas.getContext("2d");
+    this.rightQueContext.fillStyle = "grey";
+    this.rightQueContext.fillRect(0, 0, this.QUE_WIDTH, this.QUE_HEIGHT);
   }
 
 
@@ -430,7 +492,7 @@ export class GameService {
     this.contextLeft.fillStyle = "grey";
     this.contextLeft.fillRect(0, 0, this.GAME_WINDOW_WIDTH, this.GAME_WINDOW_HEIGHT);
 
-    this.contextRight.fillStyle ="grey";
+    this.contextRight.fillStyle = "grey";
     this.contextRight.fillRect(0, 0, this.GAME_WINDOW_WIDTH, this.GAME_WINDOW_HEIGHT);
 
     // this.contextLeft.fillStyle = "black";
@@ -469,48 +531,48 @@ export class GameService {
 
     let happyText = "";
     if (this.leftHappy == 0) {
-      happyText = "happy";
+      this.greenFaceContext.drawImage(this.greenFaceHappy, 0, 0, this.FACE_WIDTH, this.FACE_HEIGHT);
     }
     else if (this.leftHappy == 1) {
-      happyText = "serious";
+      this.greenFaceContext.drawImage(this.greenFaceSerious, 0, 0, this.FACE_WIDTH, this.FACE_HEIGHT);
     }
     else if (this.leftHappy == 2) {
-      happyText = "worried";
+      this.greenFaceContext.drawImage(this.greenFaceWorried, 0, 0, this.FACE_WIDTH, this.FACE_HEIGHT);
     }
     else {
-      happyText = "crying";
+      this.greenFaceContext.drawImage(this.greenFaceCrying, 0, 0, this.FACE_WIDTH, this.FACE_HEIGHT);
     }
 
     if (( this.displayWinner )) {
       if (this.winner == "left") {
-        happyText = "happy";
+        this.greenFaceContext.drawImage(this.greenFaceHappy, 0, 0, this.FACE_WIDTH, this.FACE_HEIGHT);
       }
       else {
-        happyText = "crying";
+        this.greenFaceContext.drawImage(this.greenFaceCrying, 0, 0, this.FACE_WIDTH, this.FACE_HEIGHT);
       }
     }
 
     // this.contextLeft.fillText(happyText, 130, 60);
 
     if (this.rightHappy == 0) {
-      happyText = "happy";
+      this.redFaceContext.drawImage(this.redFaceHappy, 0, 0, this.FACE_WIDTH, this.FACE_HEIGHT);
     }
     else if (this.rightHappy == 1) {
-      happyText = "serious";
+      this.redFaceContext.drawImage(this.redFaceSerious, 0, 0, this.FACE_WIDTH, this.FACE_HEIGHT);
     }
     else if (this.rightHappy == 2) {
-      happyText = "worried";
+      this.redFaceContext.drawImage(this.redFaceWorried, 0, 0, this.FACE_WIDTH, this.FACE_HEIGHT);
     }
     else {
-      happyText = "crying";
+      this.redFaceContext.drawImage(this.redFaceCrying, 0, 0, this.FACE_WIDTH, this.FACE_HEIGHT);
     }
 
     if (( this.displayWinner )) {
       if (this.winner == "right") {
-        happyText = "happy";
+        this.redFaceContext.drawImage(this.redFaceSerious, 0, 0, this.FACE_WIDTH, this.FACE_HEIGHT);
       }
       else {
-        happyText = "crying";
+        this.redFaceContext.drawImage(this.redFaceCrying, 0, 0, this.FACE_WIDTH, this.FACE_HEIGHT);
       }
     }
 
@@ -520,7 +582,7 @@ export class GameService {
     for (let i = 0; i < this.blobs.length; i++) {
       let blob = this.blobs[i];
       if (blob && blob.frame != "vanish") {
-        let context:CanvasRenderingContext2D = this.contextLeft;
+        let context: CanvasRenderingContext2D = this.contextLeft;
         if (blob.side == "right") {
           context = this.contextRight;
         }
@@ -558,6 +620,9 @@ export class GameService {
         }
         else if (blob.frame == "orbBig") {
           this.drawOrbBig(context, xPos, yPos);
+        }
+        else if (blob.frame == "glow") {
+          this.drawGlow(context, xPos, yPos, color);
         }
         else if (blob.frame == "joinRight") {
           this.drawJoin(context, xPos, yPos, color, "joinRight");
@@ -604,22 +669,22 @@ export class GameService {
         else if (blob.frame == "joinDown") {
           this.drawJoin(context, xPos, yPos, color, "joinDown");
         }
-        // else if (blob.frame == "que1") {
-        //   if (blob.side == "left") {
-        //     this.drawBlobNormal(this.contextLeft, 130, this.GAME_WINDOW_WIDTH, color);
-        //   }
-        //   else {
-        //     this.drawBlobNormal(this.contextLeft, 170, this.GAME_WINDOW_WIDTH, color);
-        //   }
-        // }
-        // else if (blob.frame == "que2") {
-        //   if (blob.side == "left") {
-        //     this.drawBlobNormal(this.contextLeft, 130, 100, color);
-        //   }
-        //   else {
-        //     this.drawBlobNormal(this.contextLeft, 170, 100, color);
-        //   }
-        // }
+        else if (blob.frame == "que2") {
+          if (blob.side == "left") {
+            this.drawBlobNormal(this.leftQueContext, ((this.QUE_WIDTH) / 2) - (this.BLOB_WIDTH / 2), 0, color);
+          }
+          else {
+            this.drawBlobNormal(this.rightQueContext, ((this.QUE_WIDTH) / 2) - (this.BLOB_WIDTH / 2), 0, color);
+          }
+        }
+        else if (blob.frame == "que1") {
+          if (blob.side == "left") {
+            this.drawBlobNormal(this.leftQueContext, ((this.QUE_WIDTH) / 2) - (this.BLOB_WIDTH / 2), this.QUE_HEIGHT / 2, color);
+          }
+          else {
+            this.drawBlobNormal(this.rightQueContext, ((this.QUE_WIDTH) / 2) - (this.BLOB_WIDTH / 2), this.QUE_HEIGHT / 2, color);
+          }
+        }
       }
 
       if (this.displayWinner) {
@@ -707,7 +772,7 @@ export class GameService {
       tempUser.totalLosses = user.totalLosses;
       tempUser.status = user.status;
       tempUser.name = user.name;
-      if(tempUser.name === this.userName) {
+      if (tempUser.name === this.userName) {
         this.setCurrentStatus(tempUser.status);
       }
       tempUserArray.push(tempUser);
@@ -816,7 +881,12 @@ export class GameService {
       return 0;
     }
 
-    let joinGameData = JSON.stringify({"name": "joinGame", "where": "0000000000", "userToken": this.token, "userName": opposingPlayer});
+    let joinGameData = JSON.stringify({
+      "name": "joinGame",
+      "where": "0000000000",
+      "userToken": this.token,
+      "userName": opposingPlayer
+    });
     this.sendCommand("joinGame", joinGameData);
     this.resetMessages();
   }
@@ -1091,6 +1161,10 @@ export class GameService {
     myContext.drawImage(this["orb"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
   }
 
+  drawGlow(myContext, xPos, yPos, color) {
+    myContext.drawImage(this[color + "GlowBlob"], xPos, yPos, this.BLOB_WIDTH, this.BLOB_HEIGHT);
+  }
+
   drawOrbBig(myContext, xPos, yPos) {
     // myContext.fillStyle = "white";
     // myContext.fillRect(xPos, yPos, 20, 20);
@@ -1106,50 +1180,50 @@ export class GameService {
     // myContext.fillStyle = "black";
     // myContext.fillRect(xPos + 3, yPos + 6, 4, 4);
     // myContext.fillRect(xPos + 13, yPos + 6, 4, 4);
-    myContext.drawImage(this[color+"BugEyeBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
+    myContext.drawImage(this[color + "BugEyeBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
   }
 
   drawBlow(myContext, xPos, yPos, color, frame) {
     myContext.fillStyle = color;
     if (frame == 1) {
       // myContext.fillRect(xPos + 5, yPos + 5, 10, 10);
-      myContext.drawImage(this[color+"Blow1Blob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
+      myContext.drawImage(this[color + "Blow1Blob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
     }
     else if (frame == 2) {
       // myContext.fillRect(xPos, yPos, 8, 8);
       // myContext.fillRect(xPos + 12, yPos, 8, 8);
       // myContext.fillRect(xPos, yPos + 12, 8, 8);
       // myContext.fillRect(xPos + 12, yPos + 12, 8, 8);
-      myContext.drawImage(this[color+"Blow2Blob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
+      myContext.drawImage(this[color + "Blow2Blob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
     }
     else if (frame == 3) {
       // myContext.fillRect(xPos - 3, yPos - 3, 5, 5);
       // myContext.fillRect(xPos + 19, yPos - 3, 5, 5);
       // myContext.fillRect(xPos - 3, yPos + 19, 5, 5);
       // myContext.fillRect(xPos + 19, yPos + 19, 5, 5);
-      myContext.drawImage(this[color+"Blow3Blob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
+      myContext.drawImage(this[color + "Blow3Blob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
     }
     else if (frame == 4) {
       // myContext.fillRect(xPos - 6, yPos - 6, 3, 3);
       // myContext.fillRect(xPos + 23, yPos - 6, 3, 3);
       // myContext.fillRect(xPos - 6, yPos + 23, 3, 3);
       // myContext.fillRect(xPos + 23, yPos + 23, 3, 3);
-      myContext.drawImage(this[color+"Blow4Blob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
+      myContext.drawImage(this[color + "Blow4Blob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
     }
   }
 
   drawBlobNormal(myContext, xPos, yPos, color) {
-    if(color === "black") {
+    if (color === "black") {
       myContext.drawImage(this.blackNormalBlob, xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
-    } else if(color === "yellow") {
+    } else if (color === "yellow") {
       myContext.drawImage(this.yellowNormalBlob, xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
-    } else if(color === "blue") {
+    } else if (color === "blue") {
       myContext.drawImage(this.blueNormalBlob, xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
-    } else if(color === "red") {
+    } else if (color === "red") {
       myContext.drawImage(this.redNormalBlob, xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
-    } else if(color === "purple") {
+    } else if (color === "purple") {
       myContext.drawImage(this.purpleNormalBlob, xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
-    } else if(color === "green") {
+    } else if (color === "green") {
       myContext.drawImage(this.greenNormalBlob, xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
     } else {
       myContext.fillStyle = color;
@@ -1160,20 +1234,20 @@ export class GameService {
   drawBlobSmushed(myContext, xPos, yPos, color) {
     // myContext.fillStyle = color;
     // myContext.fillRect(xPos, yPos + 8, 20, 12);
-    if(color === "black") {
+    if (color === "black") {
       myContext.drawImage(this["blackNormalBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
     } else {
-      myContext.drawImage(this[color+"SmushBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
+      myContext.drawImage(this[color + "SmushBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
     }
   }
 
   drawBlobVertSmushed(myContext, xPos, yPos, color) {
     // myContext.fillStyle = color;
     // myContext.fillRect(xPos + 4, yPos, 12, 20);
-    if(color === "black") {
+    if (color === "black") {
       myContext.drawImage(this["blackNormalBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
     } else {
-      myContext.drawImage(this[color+"VertSmushBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
+      myContext.drawImage(this[color + "VertSmushBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
     }
   }
 
@@ -1182,80 +1256,80 @@ export class GameService {
 
     if (name == "joinRight") {
       // myContext.fillRect(xPos + 18, yPos + 7, 2, 6);
-      myContext.drawImage(this[color+"JoinRightBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
+      myContext.drawImage(this[color + "JoinRightBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
     }
     else if (name == "joinRightLeft") {
       // myContext.fillRect(xPos, yPos + 7, 2, 6);
       // myContext.fillRect(xPos + 18, yPos + 7, 2, 6);
-      myContext.drawImage(this[color+"JoinRightLeftBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
+      myContext.drawImage(this[color + "JoinRightLeftBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
     }
     else if (name == "joinRightUp") {
       // myContext.fillRect(xPos + 18, yPos + 7, 2, 6);
       // myContext.fillRect(xPos + 7, yPos, 6, 2);
-      myContext.drawImage(this[color+"JoinRightUpBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
+      myContext.drawImage(this[color + "JoinRightUpBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
     }
     else if (name == "joinRightDown") {
       // myContext.fillRect(xPos + 18, yPos + 7, 2, 6);
       // myContext.fillRect(xPos + 7, yPos + 18, 6, 2);
-      myContext.drawImage(this[color+"JoinRightDownBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
+      myContext.drawImage(this[color + "JoinRightDownBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
     }
     else if (name == "joinRightLeftUp") {
       // myContext.fillRect(xPos, yPos + 7, 2, 6);
       // myContext.fillRect(xPos + 18, yPos + 7, 2, 6);
       // myContext.fillRect(xPos + 7, yPos, 6, 2);
-      myContext.drawImage(this[color+"JoinRightLeftUpBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
+      myContext.drawImage(this[color + "JoinRightLeftUpBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
     }
     else if (name == "joinRightLeftDown") {
       // myContext.fillRect(xPos, yPos + 7, 2, 6);
       // myContext.fillRect(xPos + 18, yPos + 7, 2, 6);
       // myContext.fillRect(xPos + 7, yPos + 18, 6, 2);
-      myContext.drawImage(this[color+"JoinRightLeftDownBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
+      myContext.drawImage(this[color + "JoinRightLeftDownBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
     }
     else if (name == "joinRightUpDown") {
       // myContext.fillRect(xPos + 18, yPos + 7, 2, 6);
       // myContext.fillRect(xPos + 7, yPos, 6, 2);
       // myContext.fillRect(xPos + 7, yPos + 18, 6, 2);
-      myContext.drawImage(this[color+"JoinRightUpDownBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
+      myContext.drawImage(this[color + "JoinRightUpDownBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
     }
     else if (name == "joinRightLeftUpDown") {
       // myContext.fillRect(xPos, yPos + 7, 2, 6);
       // myContext.fillRect(xPos + 18, yPos + 7, 2, 6);
       // myContext.fillRect(xPos + 7, yPos, 6, 2);
       // myContext.fillRect(xPos + 7, yPos + 18, 6, 2);
-      myContext.drawImage(this[color+"JoinRightLeftUpDownBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
+      myContext.drawImage(this[color + "JoinRightLeftUpDownBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
     }
     else if (name == "joinLeft") {
       // myContext.fillRect(xPos, yPos + 7, 2, 6);
-      myContext.drawImage(this[color+"JoinLeftBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
+      myContext.drawImage(this[color + "JoinLeftBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
     }
     else if (name == "joinLeftUp") {
       // myContext.fillRect(xPos, yPos + 7, 2, 6);
       // myContext.fillRect(xPos + 7, yPos, 6, 2);
-      myContext.drawImage(this[color+"JoinLeftUpBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
+      myContext.drawImage(this[color + "JoinLeftUpBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
     }
     else if (name == "joinLeftDown") {
       // myContext.fillRect(xPos, yPos + 7, 2, 6);
       // myContext.fillRect(xPos + 7, yPos + 18, 6, 2);
-      myContext.drawImage(this[color+"JoinLeftDownBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
+      myContext.drawImage(this[color + "JoinLeftDownBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
     }
     else if (name == "joinLeftUpDown") {
       // myContext.fillRect(xPos, yPos + 7, 2, 6);
       // myContext.fillRect(xPos + 7, yPos, 6, 2);
       // myContext.fillRect(xPos + 7, yPos + 18, 6, 2);
-      myContext.drawImage(this[color+"JoinLeftUpDownBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
+      myContext.drawImage(this[color + "JoinLeftUpDownBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
     }
     else if (name == "joinUp") {
       // myContext.fillRect(xPos + 7, yPos, 6, 2);
-      myContext.drawImage(this[color+"JoinUpBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
+      myContext.drawImage(this[color + "JoinUpBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
     }
     else if (name == "joinUpDown") {
       // myContext.fillRect(xPos + 7, yPos, 6, 2);
       // myContext.fillRect(xPos + 7, yPos + 18, 6, 2);
-      myContext.drawImage(this[color+"JoinUpDownBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
+      myContext.drawImage(this[color + "JoinUpDownBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
     }
     else if (name == "joinDown") {
       // myContext.fillRect(xPos + 7, yPos + 18, 6, 2);
-      myContext.drawImage(this[color+"JoinDownBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
+      myContext.drawImage(this[color + "JoinDownBlob"], xPos + this.OFFSET, yPos + this.OFFSET, this.BLOB_WIDTH, this.BLOB_HEIGHT);
     }
   }
 
