@@ -36,8 +36,8 @@
       <!-- Sidebar -->
       <div id="sidebar">
         <div class="sidebar-header">Players</div>
-        <div *ngFor="let player of players" class="sidebar-item">
-          <div class="player-name">{{player.name}}</div>
+        <div *ngFor="let player of players; let i = index;" class="sidebar-item">
+          <div class="player-name">{{player.name}} <span *ngIf="i==0" id="greenPlayer"> GREEN PLAYER</span><span *ngIf="i==1" id="redPlayer"> RED PLAYER</span></div>
           <div *ngIf="player.ready" class="player-status"><img
             src="./assets/lobby-img/status-green.svg"> Ready
           </div>

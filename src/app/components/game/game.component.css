@@ -179,7 +179,7 @@
 #chat-messages {
   width: calc(100% - 20px);
   height: calc(100% - 83px);
-  padding: 10px;
+  padding: 5px;
   margin: 0;
   overflow: auto;
 
@@ -266,6 +266,16 @@
 
 #sendBtn {
   display: none;
+}
+
+#greenPlayer {
+  color: white;
+  background-color: #baed93;
+}
+
+#redPlayer {
+  color: white;
+  background-color: #d85454;
 }
 
 .sidebar-header {
