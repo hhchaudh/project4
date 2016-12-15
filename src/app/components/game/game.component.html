@@ -10,11 +10,11 @@
     <div id="main">
       <!-- Game screen -->
       <div id="game">
-        <canvas [hidden]="countDownTimer != 0" #gameCanvasLeft class="game-display" width="120" height="240"></canvas>
+        <canvas [hidden]="countDownTimer != 0" #gameCanvasLeft class="game-display" width="300" height="600"></canvas>
         <div>
           <h1 [hidden]="countDownTimer === 0" id="countdown">{{countDownTimer}}</h1>
         </div>
-        <canvas [hidden]="countDownTimer != 0" #gameCanvasRight class="game-display" width="120" height="240"></canvas>
+        <canvas [hidden]="countDownTimer != 0" #gameCanvasRight class="game-display" width="300" height="600"></canvas>
       </div>
       <!-- Chatbox -->
       <div id="chat">
