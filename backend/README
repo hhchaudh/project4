@@ -1,0 +1,45 @@
+Welcome to the backend for AltStack.
+
+/gameLobby.pl
+	This is the main perl module that runs both the lobbies and the games.
+	The games simply fork off of this. Most of the server aspects are handled
+	here, along with logic to communicate between lobbies and games.
+
+/cgi-bin/altStackStart.cgi
+	A simple perl script that starts gameLobby.pl remotely.
+
+/cgi-bin/altStackAPI.c
+	Compile this C file as a .cgi and place it in a cgi-bin folder. This file
+	accepts http POST requests from clients and forwards them onto the gameLobby.pl
+	and any games that it forks off. This is done through socket files that are located
+	in /gameFiles/
+
+/gameFiles/die
+	All of the lobbies and games look for this file. If it is there they will all die
+	gracefully. This is useful for eliminating zombie processes.
+
+/gameFiles/userInfo
+	A dud database that is used right now to store user information and passwords.
+	This is just stored in JSON format with passwords in plain text, so do not let
+	users use secure information.
+
+/webTest/P*.html
+	These are crude test pages for the backend. P1 and P2 are made to be a set pair.
+	You can use these to login and test features like messaging and playing the game.
+	Note that each client will attempt to open 4+ websockets. This means you will need
+	to use a seperate brower if you want to test them on the same machine.
+	P3 logs in as the special test1 user. This user does not need an opponent to play
+	a game, instead once logged in, the game drops preset singles that test most of the
+	games physics and internal logic.
+
+/modules/Game.pm
+	This is the beast. I did not have time to seperate this, so this file just grew out of
+	control. This takes care of running the actual game. A flow chart of the internals can
+	be found in the project's documents.
+
+/modules/Command/*
+	This directory's files each correspond to 1 or 2 data packets that can be passed around
+	from client to the lobby and game and between the game and lobby. Each packet contains a
+	name in it, and that name correspondes to a function that will be called in one of these
+	files. The mapping of commands to files and file names can be found in the main game
+	structure of gameLobby.pl

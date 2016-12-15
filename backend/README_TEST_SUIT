@@ -1,0 +1,8 @@
+The only test for the backend is a special user
+
+go to the URL https://people.eecs.ku.edu/~jfustos/EECS448/altStack/P3.html
+
+click login->create game->ready
+
+this should start the test suite for the game physics.
+The test is successful if the level 5 combo works and then player 1 looses.
