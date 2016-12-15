@@ -31,7 +31,7 @@
       </div>
       <!-- Sidebar -->
       <div id="sidebar">
-        <div class="sidebar-header">Player Select</div>
+        <div class="sidebar-header">Players</div>
         <div *ngFor="let player of players" class="sidebar-item">
           <div class="player-name">{{player.name}}</div>
           <div *ngIf="player.ready" class="player-status"><img
@@ -46,7 +46,7 @@
         <div class="sidebar-buttons">
           <input type="submit" value="New Game" (click)="newGame()">
           <input type="submit" value="Ready" (click)="setReady()">
-          <input type="submit" value="Logout" (click)="gameLogOut()">
+          <input type="reset" value="Leave game" (click)="gameLogOut()">
         </div>
       </div>
     </div>
