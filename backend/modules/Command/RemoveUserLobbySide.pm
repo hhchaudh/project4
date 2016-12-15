@@ -26,6 +26,11 @@ sub removeUser
 	{
 		my $game = $lobby->{'games'}->{$gameOwner};
 		delete $game->{"users"}->{$userName};
+		
+		if( defined $lobby->{'activeUsers'}->{ $gameOwner } )
+		{
+			$lobby->{'activeUsers'}->{ $gameOwner }->{"status"} = "JOINABLE";
+		}
 	}
 	
 	if( defined $lobby->{'activeUsers'}->{ $userName } )

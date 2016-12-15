@@ -8,6 +8,7 @@ use IO::Socket::UNIX;
 use JSON;
 
 require "modules/GameUtil.pm";
+require "modules/Command.pm";
 
 sub newLobbyStream
 {
@@ -20,6 +21,7 @@ sub newLobbyStream
 	$stream->{"validCommands"} = $game->{'lobbyCommands'};
 	$stream->{"constant"} = 1;
 	$stream->{"close"} = $closeFunc;
+	$stream->{"readComplete"} = \&readMultiCommand;
 	
 	return $stream;
 }
@@ -37,6 +39,7 @@ sub newGameStream
 	$stream->{"constant"} = 1;
 	$stream->{"userName"} = $userName;
 	$stream->{"close"} = $closeFunc;
+	$stream->{"readComplete"} = \&readMultiCommand;
 	
 	return $stream;
 }
@@ -63,15 +66,13 @@ sub newClientStream
 		readPartial   => \&ClientReadPartial,
 		readComplete  => \&clientReadComplete,
 		
-		writeError     => \&tryAgain,
-		writePartial   => \&ClientReadPartial,
-		writeComplete  => \&clientReadComplete,
+		writeError    => \&tryAgain,
+		writePartial  => \&ClientReadPartial,
+		writeComplete => \&clientReadComplete,
 		
-		readUpdateTimeOut  => \&updateTimeOut,
-		writeUpdateTimeOut => \&updateTimeOut,
-		readWait           => \&standardWait,
-		writeWait          => \&standardWait,
-		close              => \&clientClose,
+		updateTimeOut => \&updateTimeOut,
+		wait          => \&standardWait,
+		close         => \&clientClose,
 	);
 	
 	return \%stream;
@@ -81,6 +82,19 @@ sub clientReadComplete
 {
 	my $stream = shift;
 	$stream->{'timeOut'} = 1;
+}
+
+sub readMultiCommand
+{
+	my $stream = shift;
+	my $game = $stream->{'game'};
+	
+	$stream->{'timeOut'} = 1;
+	
+	if( $stream->{'pastMessage'} )
+	{
+		push @{ $game->{'inStreams'} }, $stream;
+	}
 }
 
 sub clientClose
@@ -261,11 +275,13 @@ sub getCommand
 		my $pastMessage = $stream->{'pastMessage'};
 		$game->{'reporter'}->{'log'}->( "Got more bytes from clinet, buffer is now |$pastMessage|." );
 		
-		if( $pastMessage =~ /(.*?)\n/ )
+		if( $stream->{'pastMessage'} =~ s/(.*?)\n// )
 		{
 			my $command = $1;
+			Command::runCommand( $command, $stream );
+			
 			$stream->{'readComplete'}->( $stream );
-			return $command;
+			return;
 		}
 		else
 		{

@@ -3,6 +3,8 @@ package Command::IncrementRecord;
 use strict;
 use warnings;
 
+require "modules/UserInfo.pm";
+
 sub incrementRecord
 {
 	my $stream  = shift;
@@ -41,6 +43,8 @@ sub incrementRecord
 	my $result = ++$user->{ $field };
 	
 	$reporter->{'log'}->( "Incrementing |$field| for user |$userName| is now |$result|." );
+	
+	UserInfo::store( $game->{'users'}, $reporter );
 	
 	return;
 }

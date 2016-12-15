@@ -17,6 +17,20 @@ sub logOff
 	
 	return unless defined $userName;
 	
+	my %badToken = ();
+		
+	if( $command->{'where'} == 0 )
+	{
+		$badToken{'name'} = "badUserToken";
+		$badToken{'from'} = "LOBBY";
+	}
+	else
+	{
+		$badToken{'name'} = "badGameToken";
+	}
+	
+	$stream->{'sendCommand'}->( $stream, \%badToken );
+	
 	$game->{'activeUsers'}->{$userName}->{'timeOutUser'}->( $userName, $game );
 	
 	$stream->{'close'}->( $stream );	

@@ -4,10 +4,12 @@ use strict;
 use warnings;
 
 use IO::Socket::UNIX;
+use IO::Socket;
 
 require "modules/Stream.pm";
 require "modules/Conf.pm";
 require "modules/Report.pm";
+require "modules/Game.pm";
 
 require "modules/Command/AcceptUser.pm";
 
@@ -23,6 +25,15 @@ sub createGame
 	
 	return unless defined $userName;
 	
+	if( defined $game->{'games'}->{ $userName } )
+	{
+		$reporter->{'log'}->( "user |$userName| already has a game." );
+		my $errCmd = $command->{'vector'}->{'newErrorCommand'}->( "user |$userName| already has a game." );
+		$stream->{'sendCommand'}->( $stream, $errCmd );
+		$stream->{'close'}->( $stream );
+		return;
+	}
+	
 	$reporter->{'log'}->( "Creating new game for user |$userName|" );
 	
 	my $gameToken = $game->{"newToken"}->( $game );
@@ -30,7 +41,7 @@ sub createGame
 	
 	my $gameSock;
 	my $lobbySock;
-	unless( socketpair ( $gameSock, $lobbySock, AF_UNIX, SOCK_STREAM, PF_UNSPEC ) )
+	unless( ( $gameSock, $lobbySock ) = IO::Socket->socketpair ( AF_UNIX, SOCK_STREAM, PF_UNSPEC ) )
 	{
 		$reporter->{'log'}->( "Could not open a socket pair for the game says |$!|." );
 		my $errCmd = $command->{'vector'}->{'newErrorCommand'}->( "Could not open a socket pair for the game says |$!|." );
@@ -38,6 +49,11 @@ sub createGame
 		$stream->{'close'}->( $stream );
 		return;
 	}
+	
+	$gameSock->autoflush( 1 );
+	$gameSock->blocking( 0 );
+	$lobbySock->autoflush( 1 );
+	$lobbySock->blocking( 0 );
 	
 	my $pid = fork();
 	
@@ -107,7 +123,6 @@ sub createGame
 		
 		my $savedUserInfo = {
 								token   => $userInfo->{'token'},
-								timeOutUser => $userInfo->{'timeOutUser'},
 								totalWins   => $game->{"users"}->{ $userName }->{"wins"},
 								totalLosses => $game->{"users"}->{ $userName }->{"losses"},
 							};
@@ -115,6 +130,7 @@ sub createGame
 		
 		$game->{'state'}        = "WAITING";
 		$game->{'updateStatus'} = "GAME";
+		$game->{'extraUpdate'} = 0;
 		$game->{'users'} = {
 			"$userName" => {
 				wins   => $savedUserInfo->{"totalWins"},
@@ -137,7 +153,7 @@ sub createGame
 			}
 		};
 		$game->{'players'} = [
-			{ user => $userName, wins => 0, losses => 0 },
+			{ user => $userName, wins => 0, losses => 0, lastFrame => -1000, ready => 0 },
 		];
 		$game->{'tokens'} = {
 			"$gameToken"  => { type => 'GAME',  userName => $userName },
@@ -150,13 +166,17 @@ sub createGame
 		$game->{'clientCommands'} = $game->{'gameClientCommands'};
 		
 		my $deathFunc = $game->{'properDie'};
-		my $lobbyStream = Stream::newLobbyStream( $gameSock, $game, $deathFunc );
+		my $lobbyStream = Stream::newLobbyStream( $gameSock, $game, sub {
+																		my $stream = shift;
+																		$stream->{'game'}->{'properDie'}->( "Game socket closing!!!")
+																		} );
 		
 		my %lobbyGame = (
 			stream => $lobbyStream,
 		);
 	
 		$game->{'games'}->{'Lobby'} = \%lobbyGame;
+		$game->{'innerGame'} = Game::newInnerGame( $game );
 	}
 	
 	return;
@@ -185,8 +205,8 @@ sub destroyGame
 	
 	my $game = $lobby->{'games'}->{$userName};
 	
-	$game->{"stream"}->close();
-	foreach my $user ( @{ $game->{"users"} } )
+	$game->{"stream"}->{'sock'}->close();
+	foreach my $user ( keys %{ $game->{"users"} } )
 	{
 		next unless defined $lobby->{'activeUsers'}->{ $user };
 		my $userInfo = $lobby->{'activeUsers'}->{ $user };

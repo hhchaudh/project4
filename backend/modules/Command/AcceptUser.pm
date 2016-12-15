@@ -3,6 +3,8 @@ package Command::AcceptUser;
 use strict;
 use warnings;
 
+require "modules/Command/NewGame.pm";
+
 sub acceptUser
 {
 	my $stream  = shift;
@@ -57,7 +59,8 @@ sub acceptUser
 												status  => 'GAME',
 											};
 	
-	push @{ $game->{'players'} }, { user => $userName, wins => 0, losses => 0 };
+	$game->{'activeUsers'}->{ $userName }->{"player"} = @{ $game->{'players'} };
+	push @{ $game->{'players'} }, { user => $userName, wins => 0, losses => 0, lastFrame => -1000, ready => 0 };
 	
 	return;
 }
@@ -69,14 +72,26 @@ sub timeOutUser
 	
 	my $token = $game->{'activeUsers'}->{ $userName }->{'token'};
 	
-	updateRecordPlayerLost( $userName, $game );
+	timeOutRecord( $userName, $game );
 	
 	$game->{'activeUsers'}->{ $userName }->{"timeOutGameOwner"}->( $userName, $game );
+	
+	my %remUserCmd = (
+		name     => 'removeUser',
+		userName => $userName,
+	);
+	
+	my $stream = $game->{'games'}->{'Lobby'}->{"stream"};
+	$stream->{'sendCommand'}->( $stream, \%remUserCmd );
 	
 	delete $game->{'users'}->{ $userName };
 	delete $game->{'tokens'}->{ $token };
 	delete $game->{'activeUsers'}->{ $userName };
 	pop @{ $game->{'players'} };
+	
+	$game->{'extraUpdate'} = 1;
+	
+	Command::NewGame::forceResetGame( $game );
 	
 	return;
 }
@@ -88,15 +103,18 @@ sub timeOutRecord
 	
 	my $reporter = $game->{"reporter"};
 	
-	if( $game->{'state'} eq "ON" )
+	if( defined $game->{'innerGame'} )
 	{
-		unless( defined $game->{'activeUsers'}->{$userName} )
+		if( $game->{'innerGame'}->{'state'} eq "GAMEON" )
 		{
-			$reporter->{'log'}->( "Tried to time out user |$userName| but that user not in active users. IGNORE." );
-			return;
+			unless( defined $game->{'activeUsers'}->{$userName} )
+			{
+				$reporter->{'log'}->( "Tried to time out user |$userName| but that user not in active users. IGNORE." );
+				return;
+			}
+			
+			updateRecordPlayerLost( $userName, $game );
 		}
-		
-		updateRecordPlayerLost( $userName, $game );
 	}
 }
 
@@ -104,6 +122,8 @@ sub updateRecordPlayerLost
 {
 	my $userName = shift;
 	my $game = shift;
+	
+	my $reporter = $game->{"reporter"};
 	
 	my $losePlayerNum = $game->{'activeUsers'}->{$userName}->{"player"};
 	

@@ -30,8 +30,8 @@ sub joinGame
 	
 	unless( defined $game->{'games'}->{$gameUser} )
 	{
-		$reporter->{'log'}->( "User |userName| does not own a game." );
-		my $errCmd = $command->{'vector'}->{'newErrorCommand'}->( "User |userName| does not own a game." );
+		$reporter->{'log'}->( "User |$gameUser| does not own a game." );
+		my $errCmd = $command->{'vector'}->{'newErrorCommand'}->( "User |$gameUser| does not own a game." );
 		$stream->{'sendCommand'}->( $stream, $errCmd );
 		$stream->{'close'}->( $stream );
 		return;
@@ -39,16 +39,48 @@ sub joinGame
 	
 	my $gameRef = $game->{'games'}->{$gameUser};
 	
+	if( defined $gameRef->{'users'}->{$userName} )
+	{
+		$reporter->{'log'}->( "You are already in this game." );
+		my $errCmd = $command->{'vector'}->{'newErrorCommand'}->( "You are already in this game." );
+		$stream->{'sendCommand'}->( $stream, $errCmd );
+		$stream->{'close'}->( $stream );
+		return;
+	}
+	
+	unless( $game->{'activeUsers'}->{ $gameUser }->{"status"} eq "JOINABLE" )
+	{
+		$reporter->{'log'}->( "Game owned by |$gameUser| is not joinable." );
+		my $errCmd = $command->{'vector'}->{'newErrorCommand'}->( "Game owned by |$gameUser| is not joinable." );
+		$stream->{'sendCommand'}->( $stream, $errCmd );
+		$stream->{'close'}->( $stream );
+		return;
+	}
+	
 	$gameRef->{'users'}->{$userName} = 1;
 	$game->{'activeUsers'}->{ $userName }->{"status"} = "IN-GAME";
 	$game->{'activeUsers'}->{ $gameUser }->{"status"} = "IN-GAME";
 	$game->{'activeUsers'}->{ $userName }->{"game"} = $gameRef;
+	
+	my %acceptCmd = (
+		name    => 'acceptUser',
+		info    => {
+			userName   => $userName,
+			token      => $game->{'activeUsers'}->{ $userName }->{"token"},
+			wins       => $game->{'users'}->{ $userName }->{'wins'},
+			losses     => $game->{'users'}->{ $userName }->{'losses'},
+		}
+	);
+	
+	my $gameStream = $gameRef->{'stream'};
+	$gameStream->{'sendCommand'}->( $gameStream, \%acceptCmd );
 	
 	my %tokCmd = (
 		name    => 'gameToken',
 		token   => $gameRef->{'token'},
 	);
 	
+	$stream->{'sendCommand'}->( $stream, \%tokCmd );
 	$stream->{'close'}->( $stream );	
 	return;
 }
