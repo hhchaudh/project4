@@ -202,7 +202,7 @@
   -webkit-border-radius: 5px;
   border-radius: 5px;
   border: 1px solid #DDDDDD;
-  margin: 5px;
+  margin: 2px;
   padding: 5px;
 }
 
@@ -217,7 +217,7 @@
 #chat-entrybox input[type=text] {
   width: calc(100% - 22px);
   height: auto;
-  padding: 10px;
+  padding: 7px;
   margin: 0;
 
   transition: .5s ease-in-out;
