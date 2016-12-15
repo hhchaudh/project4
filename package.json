@@ -30,6 +30,8 @@
     "@types/node": "^6.0.42",
     "angular-cli": "1.0.0-beta.19-3",
     "codelyzer": "1.0.0-beta.1",
+    "gulp": "^3.9.1",
+    "gulp-typedoc": "^2.0.1",
     "jasmine-core": "2.4.1",
     "jasmine-spec-reporter": "2.5.0",
     "karma": "1.2.0",
@@ -40,6 +42,7 @@
     "protractor": "4.0.9",
     "ts-node": "1.2.1",
     "tslint": "3.13.0",
+    "typedoc": "^0.5.1",
     "typescript": "~2.0.3",
     "webdriver-manager": "10.2.5"
   }
